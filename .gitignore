@@ -15,7 +15,6 @@ tests/e2e/reports
 selenium-debug.log
 
 # Editor directories and files
-light_ml4j.iml
 .idea
 *.iml
 .vscode
