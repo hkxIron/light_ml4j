@@ -10,6 +10,11 @@ import lombok.extern.slf4j.Slf4j;
  * Time: 下午5:42
  */
 @Slf4j
-public class DenseVec {
+public class DenseTensor extends Tensor {
+    private float[] data;
 
+    @Override
+    public int[] getShape() {
+        return new int[0];
+    }
 }
