@@ -17,4 +17,9 @@ public class DenseTensor extends Tensor {
     public int[] getShape() {
         return new int[0];
     }
+
+    @Override
+    public void reshape(int[] shapes) {
+
+    }
 }
