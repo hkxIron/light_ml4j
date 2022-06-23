@@ -1,4 +1,4 @@
-package com.ml4j.data;
+package com.ml4j.data.utils;
 
 
 import java.io.File;

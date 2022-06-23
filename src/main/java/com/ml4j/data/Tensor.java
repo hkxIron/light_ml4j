@@ -1,14 +1,11 @@
 package com.ml4j.data;
 
-/*
- * Created by IntelliJ IDEA.
- *
- * Author: hukexin
- * Email: hukexin@xiaomi.com
- * Date: 22-6-17
- * Time: 下午5:54
- */
-public abstract class Tensor {
-    public abstract int[] getShape();
-    public abstract void reshape(int[] shapes);
+/**
+ * @author: kexin
+ * @date: 2022/6/23 21:53
+ **/
+public interface Tensor<T> {
+    int[] getShape();
+    T data();
+    void data(T t);
 }
