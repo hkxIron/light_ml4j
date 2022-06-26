@@ -32,7 +32,7 @@ public class TestMatrix {
         //int[][] arr = {{1, 2, 3}, {3, 4, 2}};
         DenseMatrix a = new DenseMatrix(new float[][]{{1, 2, 3}, {3, 4, 5}});
         DenseVector b = new DenseVector(new float[]{2, 3, 4});
-        DenseMatrix c = a.multiply(b);
+        DenseVector c = a.multiply(b);
         System.out.println(normalGson.toJson(c));
         assert c.getShape()[0] == 2;
     }
@@ -42,7 +42,7 @@ public class TestMatrix {
         //int[][] arr = {{1, 2, 3}, {3, 4, 2}};
         DenseMatrix a = new DenseMatrix(new float[][]{{1, 2, 3}, {3, 4, 5}});
         DenseVector b = new DenseVector(new float[]{2, 3, 4});
-        DenseVector c = a.multiplyToVector(b);
+        DenseVector c = a.multiply(b);
         System.out.println(normalGson.toJson(c));
     }
 }

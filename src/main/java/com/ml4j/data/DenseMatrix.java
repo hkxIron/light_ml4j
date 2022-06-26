@@ -3,6 +3,8 @@ package com.ml4j.data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.ml4j.data.VectorUtils.allEquals;
+
 /*
  * Created by IntelliJ IDEA.
  *
@@ -58,10 +60,28 @@ public class DenseMatrix implements Tensor<float[][]> {
         return new DenseMatrix(newData);
     }
 
-    public DenseMatrix multiply(DenseVector vec) {
+    public DenseMatrix transpose(boolean inPlace) {
+        int[] shape = getShape();
+        int M = shape[0];
+        int N = shape[1];
+
+        float[][] newData = new float[N][M];
+        for (int m = 0; m < M; m++) {
+            for (int n = 0; n < N; n++) {
+                newData[n][m] = data[m][n];
+            }
+        }
+        if (inPlace) {
+            data = newData;
+            return this;
+        } else {
+            return new DenseMatrix(newData);
+        }
+    }
+
+    public DenseVector multiply(DenseVector vec) {
         int[] shape = getShape();
         int[] vecShape = vec.getShape();
-        assert shape.length == 2;
         assert shape[1] == vecShape[0];
         int N = shape[1];
 
@@ -69,10 +89,56 @@ public class DenseMatrix implements Tensor<float[][]> {
         for (int i = 0; i < N; i++) {
             temp[i][0] = vec.data()[i];
         }
-        return this.multiply(new DenseMatrix(temp));
+        return this.multiply(new DenseMatrix(temp))
+                .copyVector(-1, 0);
     }
-    public DenseVector multiplyToVector(DenseVector vec) {
-        return multiply(vec).copyVector(-1, 0);
+
+    public DenseMatrix add(DenseMatrix mat, boolean inPlace) {
+        int[] shape = getShape();
+        int[] matShape = mat.getShape();
+        assert shape.length == 2;
+        assert allEquals(shape, matShape);
+
+        int M = shape[0];
+        int N = shape[1];
+        float[][] newData;
+        if (inPlace) {
+            newData = this.data;
+        } else {
+            newData = new float[M][N];
+        }
+        for (int m = 0; m < M; m++) {
+            for (int n = 0; n < N; n++) {
+                newData[m][n] = data[m][n] + mat.data[m][n];
+            }
+        }
+        if (inPlace) {
+            return this;
+        } else {
+            return new DenseMatrix(newData);
+        }
+    }
+
+    public DenseMatrix multiply(float x, boolean inPlace) {
+        int[] shape = getShape();
+        int M = shape[0];
+        int N = shape[1];
+        float[][] newData;
+        if (inPlace) {
+            newData = this.data;
+        } else {
+            newData = new float[M][N];
+        }
+        for (int m = 0; m < M; m++) {
+            for (int n = 0; n < N; n++) {
+                newData[m][n] = data[m][n] * x;
+            }
+        }
+        if (inPlace) {
+            return this;
+        } else {
+            return new DenseMatrix(newData);
+        }
     }
 
     /**
