@@ -10,8 +10,8 @@ import com.ml4j.optimizer.FixedOptimizer;
 import com.ml4j.optimizer.Optimizer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.mahout.classifier.evaluation.Auc;
 import org.junit.Test;
-import org.mortbay.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,18 +83,18 @@ public class TestNetwork {
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
-        int epochNum = 100;
+        int epochNum = 1000;
         int iter = 0;
         Pair<DenseVector[], DenseVector[]> xy = getIrisData(sampleNum);
         DenseVector[] x = xy.getLeft();
         DenseVector[] y = xy.getRight();
 
         for (int epoch = 0; epoch < epochNum; epoch++) {
-            float trainLoss = 0;
+            float epochLoss = 0;
             int[] pred = new int[sampleNum];
             int[] label = new int[sampleNum];
             for (int i = 0; i < sampleNum; i++) {
-                trainLoss = net.train(x[i], y[i]);
+                epochLoss += net.train(x[i], y[i]);
 
                 pred[i] = maxIndex(net.predict(x[i]));
                 label[i] = maxIndex(y[i].data());
@@ -107,7 +107,7 @@ public class TestNetwork {
             }
             //log.info("epoch:{} iter:{} train loss:{}", epoch, iter, trainLoss);
             float acc = calculateAcc(pred, label);
-            log.info("epoch:{} iter:{} train loss:{} train acc:{}", epoch, iter, trainLoss, acc);
+            log.info("epoch:{} iter:{} train loss:{} train acc:{}", epoch, iter, epochLoss /sampleNum, acc);
         }
     }
 
@@ -118,30 +118,39 @@ public class TestNetwork {
 
         List<Layer> layers = new ArrayList<>();
         //layers.add(new DenseLayer(5, sigmoid, "first"));
-        layers.add(new DenseLayer(4, sigmoid, "second"));
+        layers.add(new DenseLayer(1, sigmoid, "second"));
 
         Loss loss = new BinaryLoigitWithCrossEntropyLoss();
         Initializer initializer = new NormalInitializer();
-        Optimizer optimizer = new FixedOptimizer(1e-4f);
+        Optimizer optimizer = new FixedOptimizer(1e-3f);
         Network net = new Network(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
-        int epochNum = 100;
+        int epochNum = 1000;
         int iter = 0;
         Pair<DenseVector[], DenseVector[]> xy = getIrisData(sampleNum);
         DenseVector[] x = xy.getLeft();
-        DenseVector[] y = xy.getRight();
+        DenseVector[] oneHotY = xy.getRight();
+        DenseVector[] binarayY = new DenseVector[oneHotY.length];
+        for (int i = 0; i < oneHotY.length; i++) {
+            binarayY[i] = new DenseVector(new float[]{oneHotY[i].data()[0] == 1 ? 1 : 0});
+        }
+
         for (int epoch = 0; epoch < epochNum; epoch++) {
-            float trainLoss = 0;
+            float epochLoss = 0;
+            //float[] pred = new float[sampleNum];
+            Auc auc = new Auc();
             for (int i = 0; i < sampleNum; i++) {
-                trainLoss = net.train(x[i], y[i]);
-                if (iter % 2000 == 0) {
-                    log.info("epoch:{} iter:{} train loss:{}", epoch, iter, trainLoss);
-                }
+                epochLoss += net.train(x[i], binarayY[i]);
+
+                //pred[i] = net.predict(x[i])[0];
+                int label = (int) binarayY[i].data()[0];
+                float pred = net.predict(x[i])[0];
+                auc.add(label, pred);
                 iter++;
             }
-            //log.info("epoch:{} iter:{} train loss:{}", epoch, iter, trainLoss);
+            log.info("epoch:{} iter:{} train loss:{} train auc:{}", epoch, iter, epochLoss/sampleNum, auc.auc());
         }
     }
 }

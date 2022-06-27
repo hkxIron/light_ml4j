@@ -94,7 +94,7 @@ public class Network {
             in = layer.forward();
         }
         lossLayer.setInput(in);
-        float[] score = lossLayer.computeGrad().data();
-        return score;
+        DenseVector score = lossLayer.predict();
+        return score.data();
     }
 }

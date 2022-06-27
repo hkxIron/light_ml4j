@@ -13,6 +13,7 @@ import lombok.Setter;
  * @date: 2022/6/23 23:10
  **/
 public class DenseLayer implements Layer {
+    @Getter
     private String name;
     @Setter
     private DenseVector input; // [1, inSize]
@@ -49,12 +50,12 @@ public class DenseLayer implements Layer {
     }
 
     @Override
-    public int getOutSize(){
+    public int getOutSize() {
         return this.outSize;
     }
 
     @Override
-    public int getInSize(){
+    public int getInSize() {
         return this.inSize;
     }
 
@@ -67,7 +68,8 @@ public class DenseLayer implements Layer {
      */
     @Override
     public DenseVector forward() {
-        this.wxPlusBias = weight.multiply(input).add(bias, true); // [outsize]
+        this.wxPlusBias = weight.multiply(input)
+                .add(bias, true); // [outsize]
         DenseVector p = function.activate(wxPlusBias, false);
         return p;
     }
@@ -76,12 +78,12 @@ public class DenseLayer implements Layer {
      * dLoss/dPi = Pi - Yi
      * dLoss/dW =dLoss/dPi * dPi/dai *dai/dW
      * delta = dLoss/dX = dLoss/dPi *dPi/ai * dai/dX
-     *
+     * <p>
      * delta = dLoss/dPi
      * dPi/dai = f'(ai)
-     *
+     * <p>
      * dai/dw = d(Wx+b)/dw = x'
-     *
+     * <p>
      * dai/dX = w'
      */
     @Override

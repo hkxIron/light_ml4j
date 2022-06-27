@@ -83,14 +83,15 @@ public class DenseMatrix implements Tensor<float[][]> {
         int[] shape = getShape();
         int[] vecShape = vec.getShape();
         assert shape[1] == vecShape[0];
+        int M = shape[0];
         int N = shape[1];
 
-        float[][] temp = new float[N][1];
-        for (int i = 0; i < N; i++) {
-            temp[i][0] = vec.data()[i];
+
+        float[] dot = new float[M];
+        for (int r = 0; r < M; r++) {
+            dot[r] = new DenseVector(data[r]).innerProduct(vec);
         }
-        return this.multiply(new DenseMatrix(temp))
-                .copyVector(-1, 0);
+        return new DenseVector(dot);
     }
 
     public DenseMatrix add(DenseMatrix mat, boolean inPlace) {
