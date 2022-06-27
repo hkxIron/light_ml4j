@@ -1,5 +1,6 @@
 package com.ml4j.math;
 
+import static com.ml4j.data.VectorUtils.allEquals;
 import static com.ml4j.data.VectorUtils.maxIndex;
 
 /**
@@ -7,6 +8,18 @@ import static com.ml4j.data.VectorUtils.maxIndex;
  * @date: 2022/6/23 23:04
  **/
 public class FunctionUtils {
+
+    public static float clip(float x, float lower, float upper) {
+        assert upper >= lower;
+        if (x > upper) {
+            x = upper;
+        }
+        if (x < lower) {
+            x = lower;
+        }
+        return x;
+    }
+
     public static float sigmoid(float x) {
         double result = 1 / (1 + Math.pow(Math.E, -x));
         return (float) result;

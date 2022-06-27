@@ -11,7 +11,7 @@ import static com.ml4j.math.FunctionUtils.softmax;
  * @author: kexin
  * @date: 2022/6/25 16:04
  **/
-public class BinaryLoigitWithCrossEntropyLoss extends Loss {
+public class BinaryLogitWithCrossEntropyLoss extends Loss {
 
     /**
      * yi =softmax(xi)
@@ -27,7 +27,7 @@ public class BinaryLoigitWithCrossEntropyLoss extends Loss {
         assert x.data().length == label.data().length;
 
         pred = predict();
-        float loss = 0;
+        float loss;
         if ((int) label.data()[0] == 1) {
             loss = -(float) Math.log(pred.data()[0]);
         } else {

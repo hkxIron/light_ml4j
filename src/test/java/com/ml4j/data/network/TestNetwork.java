@@ -1,9 +1,12 @@
 package com.ml4j.data.network;
 
+import com.google.common.collect.Lists;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.Initializer;
 import com.ml4j.data.NormalInitializer;
+import com.ml4j.data.utils.GsonUtil;
 import com.ml4j.math.ActivateFunction;
+import com.ml4j.math.Identity;
 import com.ml4j.math.Sigmoid;
 import com.ml4j.network.*;
 import com.ml4j.optimizer.FixedOptimizer;
@@ -31,6 +34,29 @@ import static com.ml4j.metric.Accurrancy.calculateAcc;
  */
 @Slf4j
 public class TestNetwork {
+    public List<Pair<DenseVector[], DenseVector[]>> split(Pair<DenseVector[], DenseVector[]> xy, float trainRatio) {
+        int all = xy.getLeft().length;
+        int trainSize = (int) (all * trainRatio);
+        DenseVector x = xy.getLeft();
+        DenseVector y = xy.getRight();
+
+        DenseVector[] trainX = new DenseVector[trainSize];
+        DenseVector[] trainY = new DenseVector[trainSize];
+
+        for (int i = 0; i < trainSize; i++) {
+            trainX[i] = x[i];
+            trainY[i] = y[i];
+        }
+
+        DenseVector[] testX = new DenseVector[all - trainSize];
+        DenseVector[] testY = new DenseVector[all - trainSize];
+        for (int i = trainSize; i < all; i++) {
+            testX[i] = x[i];
+            testY[i] = y[i];
+        }
+
+        return Lists.newArrayList(Pair.of(trainX, trainY), Pair.of(testX, testY));
+    }
 
     public Pair<DenseVector[], DenseVector[]> getIrisData(int sampleNum) throws Exception {
         String content = readFile(getFileAbsolutePath("iris.csv"));
@@ -74,83 +100,95 @@ public class TestNetwork {
 
         List<Layer> layers = new ArrayList<>();
         //layers.add(new DenseLayer(5, sigmoid, "first"));
-        layers.add(new DenseLayer(4, sigmoid, "second"));
+        layers.add(new DenseLayer(5, sigmoid, "second"));
+        layers.add(new DenseLayer(4, new Identity(), "second"));
 
         Loss loss = new SoftmaxWithCrossEntropyLoss();
         Initializer initializer = new NormalInitializer();
-        Optimizer optimizer = new FixedOptimizer(1e-4f);
+        Optimizer optimizer = new FixedOptimizer(5e-3f);
         Network net = new Network(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
-        int epochNum = 1000;
+        int epochNum = 100;
         int iter = 0;
         Pair<DenseVector[], DenseVector[]> xy = getIrisData(sampleNum);
         DenseVector[] x = xy.getLeft();
         DenseVector[] y = xy.getRight();
 
+        int[] pred = new int[sampleNum];
+        int[] label = new int[sampleNum];
+
         for (int epoch = 0; epoch < epochNum; epoch++) {
             float epochLoss = 0;
-            int[] pred = new int[sampleNum];
-            int[] label = new int[sampleNum];
             for (int i = 0; i < sampleNum; i++) {
                 epochLoss += net.train(x[i], y[i]);
 
                 pred[i] = maxIndex(net.predict(x[i]));
                 label[i] = maxIndex(y[i].data());
-                /*
-                if (iter % 2000 == 0) {
-                    log.info("epoch:{} iter:{} train loss:{}", epoch, iter, trainLoss);
-                }
-                */
                 iter++;
             }
-            //log.info("epoch:{} iter:{} train loss:{}", epoch, iter, trainLoss);
             float acc = calculateAcc(pred, label);
-            log.info("epoch:{} iter:{} train loss:{} train acc:{}", epoch, iter, epochLoss /sampleNum, acc);
+            log.info("epoch:{} iter:{} train loss:{} train acc:{}", epoch, iter, epochLoss / sampleNum, acc);
         }
+        log.info("label:{}", GsonUtil.normalGson.toJson(label));
+        log.info("pred:{}", GsonUtil.normalGson.toJson(pred));
     }
 
     @Test
     public void testBinaryCrossEntropyLoss() throws Exception {
         ActivateFunction sigmoid = new Sigmoid();
+        ActivateFunction identity = new Identity();
         int inputFeatureDim = 4;
 
         List<Layer> layers = new ArrayList<>();
-        //layers.add(new DenseLayer(5, sigmoid, "first"));
-        layers.add(new DenseLayer(1, sigmoid, "second"));
+        layers.add(new DenseLayer(5, sigmoid, "first"));
+        layers.add(new DenseLayer(1, identity, "second"));
 
-        Loss loss = new BinaryLoigitWithCrossEntropyLoss();
+        Loss loss = new BinaryLogitWithCrossEntropyLoss();
         Initializer initializer = new NormalInitializer();
-        Optimizer optimizer = new FixedOptimizer(1e-3f);
+        Optimizer optimizer = new FixedOptimizer(5e-3f);
         Network net = new Network(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
-        int epochNum = 1000;
+        int epochNum = 40;
         int iter = 0;
-        Pair<DenseVector[], DenseVector[]> xy = getIrisData(sampleNum);
-        DenseVector[] x = xy.getLeft();
-        DenseVector[] oneHotY = xy.getRight();
-        DenseVector[] binarayY = new DenseVector[oneHotY.length];
+        List<Pair<DenseVector[], DenseVector[]>> xy = split(getIrisData(sampleNum), 0.7);
+        DenseVector[] x = xy.get(0).getLeft();
+        DenseVector[] oneHotY = xy(0).getRight();
+
+        DenseVector[] testX = xy.get(1).getLeft();
+        DenseVector[] testOneHotY = xy(1).getRight();
+
+        DenseVector[] binaryY = new DenseVector[oneHotY.length];
+        int[] originLabel = new int[sampleNum];
+        int posNum = 0;
         for (int i = 0; i < oneHotY.length; i++) {
-            binarayY[i] = new DenseVector(new float[]{oneHotY[i].data()[0] == 1 ? 1 : 0});
+            int pos = oneHotY[i].data()[0] == 1 ? 1 : 0;
+            posNum += pos;
+            originLabel[i] = pos;
+            binaryY[i] = new DenseVector(new float[]{pos});
         }
+
+        System.out.println("posNUm:" + posNum + " negNum:" + (sampleNum - posNum) + " sampleNum:" + sampleNum);
+        float[] predScore = new float[sampleNum];
 
         for (int epoch = 0; epoch < epochNum; epoch++) {
             float epochLoss = 0;
-            //float[] pred = new float[sampleNum];
             Auc auc = new Auc();
             for (int i = 0; i < sampleNum; i++) {
-                epochLoss += net.train(x[i], binarayY[i]);
-
+                epochLoss += net.train(x[i], binaryY[i]);
                 //pred[i] = net.predict(x[i])[0];
-                int label = (int) binarayY[i].data()[0];
+                int label = (int) binaryY[i].data()[0];
                 float pred = net.predict(x[i])[0];
+                predScore[i] = pred;
                 auc.add(label, pred);
                 iter++;
             }
-            log.info("epoch:{} iter:{} train loss:{} train auc:{}", epoch, iter, epochLoss/sampleNum, auc.auc());
+            log.info("epoch:{} iter:{} train loss:{} train auc:{}", epoch, iter, epochLoss / sampleNum, auc.auc());
         }
+        log.info("pred :{}", GsonUtil.normalGson.toJson(predScore));
+        log.info("label:{}", GsonUtil.normalGson.toJson(originLabel));
     }
 }

@@ -36,6 +36,7 @@ public class Network {
         log.info("layerNum:{} featSize:{}", layerNum, featSize);
         assert layerNum > 0;
         mlpLayers.get(0).initWeights(featSize, initializer);
+
         for (int i = 1; i < layerNum; i++) {
             int inSize = mlpLayers.get(i - 1).getOutSize();
             mlpLayers.get(i).initWeights(inSize, initializer);
