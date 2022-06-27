@@ -1,7 +1,5 @@
 package com.ml4j.data.math;
 
-import com.google.gson.Gson;
-import com.ml4j.data.DenseMatrix;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.utils.GsonUtil;
 import com.ml4j.math.FunctionUtils;
@@ -9,7 +7,7 @@ import org.junit.Test;
 
 import static com.ml4j.data.VectorUtils.allEquals;
 import static com.ml4j.data.VectorUtils.sum;
-import static com.ml4j.metric.Accurrancy.calculateAcc;
+import static com.ml4j.metric.Accuracy.calculateAcc;
 
 /**
  * @author: kexin

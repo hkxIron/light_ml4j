@@ -1,5 +1,7 @@
 package com.ml4j.math;
 
+import java.util.Arrays;
+
 import static com.ml4j.math.FunctionUtils.dRelu;
 import static com.ml4j.math.FunctionUtils.relu;
 
@@ -20,9 +22,7 @@ public class Identity extends ActivateFunction {
     @Override
     public float[] gradient(float[] x) {
         float[] arr = new float[x.length];
-        for (int i = 0; i < x.length; i++) {
-            arr[i] = 1;
-        }
+        Arrays.fill(arr, 1);
         return arr;
     }
 }

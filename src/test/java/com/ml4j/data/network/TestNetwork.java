@@ -22,7 +22,7 @@ import java.util.List;
 import static com.ml4j.data.VectorUtils.maxIndex;
 import static com.ml4j.data.utils.FileUtils.getFileAbsolutePath;
 import static com.ml4j.data.utils.FileUtils.readFile;
-import static com.ml4j.metric.Accurrancy.calculateAcc;
+import static com.ml4j.metric.Accuracy.calculateAcc;
 
 /*
  * Created by IntelliJ IDEA.

@@ -14,6 +14,12 @@ public class DenseVector implements Tensor<float[]> {
         this.data = data;
     }
 
+    public DenseVector copy() {
+        float[] newData = new float[data.length];
+        System.arraycopy(data, 0, newData, 0, data.length);
+        return new DenseVector(newData);
+    }
+
     @Override
     public int[] getShape() {
         return new int[]{data.length};

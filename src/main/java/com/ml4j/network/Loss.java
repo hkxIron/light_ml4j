@@ -17,7 +17,6 @@ public abstract class Loss {
     private DenseVector label;
 
     protected DenseVector pred;
-    //protected float loss;
     //protected DenseVector delta; // 即为dL/dX
 
     public abstract float computeLoss(); // batch loss
@@ -25,17 +24,4 @@ public abstract class Loss {
     public abstract DenseVector predict(); //
 
     public abstract DenseVector computeGrad();
-
-    /*
-    public void update() {
-    }
-
-    public DenseVector forward() {
-        return null;
-    }
-
-    public DenseVector backward(DenseVector diff) {
-        return null;
-    }
-    */
 }
