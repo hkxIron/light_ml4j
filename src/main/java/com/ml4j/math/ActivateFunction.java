@@ -14,7 +14,8 @@ public abstract class ActivateFunction {
     public DenseVector activate(DenseVector x, boolean inPlace) {
         float[] c = activate(x.data());
         if (inPlace) {
-            System.arraycopy(c, 0, x.data(), 0, x.data().length);
+            ///System.arraycopy(c, 0, x.data(), 0, x.data().length);
+            x.data(c);
             return x;
         } else {
             return new DenseVector(c);
@@ -24,7 +25,8 @@ public abstract class ActivateFunction {
     public DenseVector gradient(DenseVector x, boolean inPlace) {
         float[] c = gradient(x.data());
         if (inPlace) {
-            System.arraycopy(c, 0, x.data(), 0, x.data().length);
+            x.data(c);
+            //System.arraycopy(c, 0, x.data(), 0, x.data().length);
             return x;
         } else {
             return new DenseVector(c);

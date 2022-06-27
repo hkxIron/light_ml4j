@@ -16,19 +16,19 @@ import java.util.List;
 @Slf4j
 public class Network {
     @Getter
-    @Setter
     private Optimizer optimizer;
     @Getter
-    private List<DenseLayer> mlpLayers;
+    private List<Layer> mlpLayers;
     @Getter
-    private LossLayer lossLayer;
+    private Loss lossLayer;
     @Getter
     private Initializer initializer;
 
-    public Network(List<DenseLayer> layers, LossLayer lossLayer, Initializer initializer) {
+    public Network(List<Layer> layers, Loss lossLayer, Initializer initializer, Optimizer optimizer) {
         this.mlpLayers = layers;
         this.lossLayer = lossLayer;
         this.initializer = initializer;
+        this.optimizer = optimizer;
     }
 
     public void build(int featSize) {
@@ -47,13 +47,14 @@ public class Network {
         assert num > 0;
         DenseVector in = x;
         for (int i = 0; i < num; i++) {
-            DenseLayer layer = mlpLayers.get(i);
+            Layer layer = mlpLayers.get(i);
             layer.setInput(in);
             in = layer.forward();
         }
         lossLayer.setInput(in);
         lossLayer.setLabel(y);
         float loss = lossLayer.computeLoss();
+
         return loss;
     }
 
@@ -62,7 +63,7 @@ public class Network {
         assert num > 0;
         DenseVector delta = lossLayer.computeGrad();
         for (int i = num - 1; i >= 0; i--) {
-            DenseLayer layer = mlpLayers.get(i);
+            Layer layer = mlpLayers.get(i);
             delta = layer.backward(delta);
         }
     }
@@ -70,10 +71,30 @@ public class Network {
     public void update() {
         int num = mlpLayers.size();
         assert num > 0;
-        DenseVector delta = lossLayer.computeGrad();
         for (int i = num - 1; i >= 0; i--) {
-            DenseLayer layer = mlpLayers.get(i);
-            layer.update();
+            Layer layer = mlpLayers.get(i);
+            layer.update(optimizer);
         }
+    }
+
+    public float train(DenseVector x, DenseVector y){
+       float loss = forward(x, y);
+       backward();
+       update();
+       return loss;
+    }
+
+    public float[] predict(DenseVector x){
+        int num = mlpLayers.size();
+        assert num > 0;
+        DenseVector in = x;
+        for (int i = 0; i < num; i++) {
+            Layer layer = mlpLayers.get(i);
+            layer.setInput(in);
+            in = layer.forward();
+        }
+        lossLayer.setInput(in);
+        float[] score = lossLayer.computeGrad().data();
+        return score;
     }
 }

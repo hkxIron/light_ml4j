@@ -2,6 +2,7 @@ package com.ml4j.network;
 
 import com.ml4j.data.DenseVector;
 
+import static com.ml4j.math.FunctionUtils.sigmoid;
 import static com.ml4j.math.FunctionUtils.softmax;
 
 /**
@@ -10,12 +11,12 @@ import static com.ml4j.math.FunctionUtils.softmax;
  * @author: kexin
  * @date: 2022/6/25 16:04
  **/
-public class SoftmaxWithCrossEntropyLoss extends Loss {
+public class BinaryLoigitWithCrossEntropyLoss extends Loss {
 
     /**
      * yi =softmax(xi)
      * <p>
-     * CrossEntropyLoss = - sum_i(label_i*log(yi_i))
+     * CrossEntropyLoss = (-1) [yi log(pi) + (1-yi) log(1-pi)]
      *
      * @return
      */
@@ -24,20 +25,20 @@ public class SoftmaxWithCrossEntropyLoss extends Loss {
         DenseVector x = this.getInput();
         DenseVector label = this.getLabel();
         assert x.data().length == label.data().length;
-        int classNum = label.data().length;
+
         pred = predict();
         float loss = 0;
-        for (int i = 0; i < classNum; i++) {
-            if ((int) label.data()[i] == 1) {
-                loss += -Math.log(pred.data()[i]);
-            }
+        if ((int) label.data()[0] == 1) {
+            loss = -(float) Math.log(pred.data()[0]);
+        } else {
+            loss = -(float) Math.log(1 - pred.data()[0]);
         }
         return loss;
     }
 
     @Override
     public DenseVector predict() {
-        float[] pred = softmax(this.getInput().data());
+        float[] pred = {sigmoid(this.getInput().data()[0])};
         return new DenseVector(pred);
     }
 

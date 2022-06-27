@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import static com.ml4j.data.VectorUtils.allEquals;
 import static com.ml4j.data.VectorUtils.sum;
+import static com.ml4j.metric.Accurrancy.calculateAcc;
 
 /**
  * @author: kexin
@@ -30,5 +31,13 @@ public class TestFunction {
        int[] a = {1,2,3};
        int[] b = {1,2,3};
        assert allEquals(a,b);
+    }
+
+    @Test
+    public void testAcc(){
+        int[] a = {1,2,0};
+        int[] b = {1,2,2};
+        float acc = calculateAcc(a, b);
+        System.out.println(acc);
     }
 }

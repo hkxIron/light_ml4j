@@ -13,14 +13,14 @@ import lombok.Setter;
  * @date: 2022/6/23 23:10
  **/
 public class DenseLayer implements Layer {
+    private String name;
     @Setter
     private DenseVector input; // [1, inSize]
 
-    @Getter
     private int outSize;
+
     @Getter
     private int inSize;
-    private Optimizer optimizer;
     private ActivateFunction function;
 
     private DenseMatrix weight; // [outSize, inSize]
@@ -29,16 +29,33 @@ public class DenseLayer implements Layer {
     private DenseVector dLdb; // [1* outSize]
     private DenseMatrix dLdW;
 
-    public DenseLayer(int outSize) {
-        this.outSize = outSize;
+    public DenseLayer(int outSize, ActivateFunction function) {
+        this(outSize, function, "dense");
     }
 
+    public DenseLayer(int outSize, ActivateFunction function, String name) {
+        this.outSize = outSize;
+        this.function = function;
+        this.name = name;
+    }
+
+    @Override
     public void initWeights(int inSize, Initializer initializer) {
         this.inSize = inSize;
         weight = new DenseMatrix(new float[outSize][inSize]);
         bias = new DenseVector(new float[outSize]);
         initializer.init(weight);
         initializer.init(bias);
+    }
+
+    @Override
+    public int getOutSize(){
+        return this.outSize;
+    }
+
+    @Override
+    public int getInSize(){
+        return this.inSize;
     }
 
     /**
@@ -59,12 +76,12 @@ public class DenseLayer implements Layer {
      * dLoss/dPi = Pi - Yi
      * dLoss/dW =dLoss/dPi * dPi/dai *dai/dW
      * delta = dLoss/dX = dLoss/dPi *dPi/ai * dai/dX
-     * <p>
+     *
      * delta = dLoss/dPi
      * dPi/dai = f'(ai)
-     * <p>
+     *
      * dai/dw = d(Wx+b)/dw = x'
-     * <p>
+     *
      * dai/dX = w'
      */
     @Override
@@ -78,16 +95,17 @@ public class DenseLayer implements Layer {
 
         // weight:[outSize, inSize]
         // diff:[1, outSize]
+        // 注意 delta = dL/dX
         DenseVector dLdX = weight.transpose(false).multiply(diff); // [1*inSize]
         return dLdX;
     }
 
     @Override
-    public void update() {
+    public void update(Optimizer optimizer) {
         // update
         // w = w + (-1)*lr* dL/dW
         // b = b + (-1)*lr* dL/db
-        float learingRate = this.optimizer.getInitLearningRate();
+        float learingRate = optimizer.getInitLearningRate();
         this.weight.add(dLdW.multiply(-learingRate, false), true);
         this.bias.add(dLdb.multiply(-learingRate, false), true);
     }

@@ -59,4 +59,12 @@ public class VectorUtils {
         }
         return c;
     }
+
+    public static int[] toInt(float[] a) {
+        int[] c = new int[a.length];
+        for (int i = 0; i < a.length; i++) {
+            c[i] = (int) a[i];
+        }
+        return c;
+    }
 }

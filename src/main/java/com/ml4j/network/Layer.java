@@ -2,6 +2,8 @@ package com.ml4j.network;
 
 import com.ml4j.data.DenseMatrix;
 import com.ml4j.data.DenseVector;
+import com.ml4j.data.Initializer;
+import com.ml4j.optimizer.Optimizer;
 import lombok.Getter;
 
 /**
@@ -11,5 +13,9 @@ import lombok.Getter;
 public interface Layer {
     DenseVector forward();
     DenseVector backward(DenseVector delta);
-    void update();
+    void update(Optimizer optimizer); // 更新权重
+    void initWeights(int inSize, Initializer initializer);
+    void setInput(DenseVector x);
+    int getOutSize();
+    int getInSize();
 }
