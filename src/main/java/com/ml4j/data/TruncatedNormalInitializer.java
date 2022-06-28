@@ -1,19 +1,17 @@
 package com.ml4j.data;
 
-import java.util.Random;
-
 import static com.ml4j.math.FunctionUtils.clip;
 
 /**
  * @author: kexin
  * @date: 2022/6/25 17:04
  **/
-public class NormalInitializer extends Initializer {
-    public NormalInitializer(float mean, float std) {
+public class TruncatedNormalInitializer extends Initializer {
+    public TruncatedNormalInitializer(float mean, float std) {
         super(mean, std);
     }
 
-    public NormalInitializer() {
+    public TruncatedNormalInitializer() {
         this(0, 1);
     }
 

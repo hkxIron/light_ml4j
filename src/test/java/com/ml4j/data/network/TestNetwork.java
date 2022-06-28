@@ -3,12 +3,13 @@ package com.ml4j.data.network;
 import com.google.common.collect.Lists;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.Initializer;
-import com.ml4j.data.NormalInitializer;
+import com.ml4j.data.TruncatedNormalInitializer;
 import com.ml4j.data.utils.GsonUtil;
 import com.ml4j.math.ActivateFunction;
 import com.ml4j.math.Identity;
 import com.ml4j.math.Sigmoid;
 import com.ml4j.network.*;
+import com.ml4j.optimizer.ExponentDecayOptimizer;
 import com.ml4j.optimizer.FixedOptimizer;
 import com.ml4j.optimizer.Optimizer;
 import com.ml4j.regularizer.L2Regularizer;
@@ -105,7 +106,7 @@ public class TestNetwork {
         layers.add(new DenseLayer(4, new Identity(), "second", new L2Regularizer(1e-4f)));
 
         Loss loss = new SoftmaxWithCrossEntropyLoss();
-        Initializer initializer = new NormalInitializer();
+        Initializer initializer = new TruncatedNormalInitializer();
         Optimizer optimizer = new FixedOptimizer(5e-3f);
         Network net = new Network(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
@@ -147,7 +148,7 @@ public class TestNetwork {
         layers.add(new DenseLayer(1, identity, "second", null));
 
         Loss loss = new BinaryLogitWithCrossEntropyLoss();
-        Initializer initializer = new NormalInitializer();
+        Initializer initializer = new TruncatedNormalInitializer();
         Optimizer optimizer = new FixedOptimizer(5e-3f);
         Network net = new Network(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
@@ -190,5 +191,47 @@ public class TestNetwork {
         }
         log.info("pred :{}", GsonUtil.normalGson.toJson(predScore));
         log.info("label:{}", GsonUtil.normalGson.toJson(originLabel));
+    }
+
+    @Test
+    public void testSquareLoss() throws Exception {
+        ActivateFunction sigmoid = new Sigmoid();
+        int inputFeatureDim = 4;
+
+        List<Layer> layers = new ArrayList<>();
+        //layers.add(new DenseLayer(5, sigmoid, "first"));
+        layers.add(new DenseLayer(5, sigmoid, "second", new L2Regularizer(1e-4f)));
+        layers.add(new DenseLayer(4, new Identity(), "second", new L2Regularizer(1e-4f)));
+
+        Loss loss = new SquareLoss();
+        Initializer initializer = new TruncatedNormalInitializer();
+        Optimizer optimizer = new ExponentDecayOptimizer(5e-3f, 0.99f, 20000);
+        Network net = new Network(layers, loss, initializer, optimizer);
+        net.build(inputFeatureDim);
+
+        int sampleNum = 120;
+        int epochNum = 100;
+        int iter = 0;
+        Pair<DenseVector[], DenseVector[]> xy = getIrisData(sampleNum);
+        DenseVector[] x = xy.getLeft();
+        DenseVector[] y = xy.getRight();
+
+        int[] pred = new int[sampleNum];
+        int[] label = new int[sampleNum];
+
+        for (int epoch = 0; epoch < epochNum; epoch++) {
+            float epochLoss = 0;
+            for (int i = 0; i < sampleNum; i++) {
+                epochLoss += net.train(x[i], y[i]);
+
+                pred[i] = maxIndex(net.predict(x[i]));
+                label[i] = maxIndex(y[i].data());
+                iter++;
+            }
+            float acc = calculateAcc(pred, label);
+            log.info("epoch:{} iter:{} train loss:{} train acc:{}", epoch, iter, epochLoss / sampleNum, acc);
+        }
+        log.info("label:{}", GsonUtil.normalGson.toJson(label));
+        log.info("pred:{}", GsonUtil.normalGson.toJson(pred));
     }
 }
