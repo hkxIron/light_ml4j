@@ -24,7 +24,9 @@ public class DenseLayer implements Layer {
     private int inSize;
     private ActivateFunction function;
 
+    @Getter
     private DenseMatrix weight; // [outSize, inSize]
+    @Getter
     private DenseVector bias; // 输出有多少个节点，就有多少个bias, [1, outSize]
     private DenseVector wxPlusBias;
     private DenseVector dLdb; // [1* outSize]
@@ -93,7 +95,6 @@ public class DenseLayer implements Layer {
 
         this.dLdb = delta.elementWiseMultiply(dPda, false); // [1* outSize]
         this.dLdW = diff.outerProduct(input);
-        // TODO:L2 regularization
 
         // weight:[outSize, inSize]
         // diff:[1, outSize]

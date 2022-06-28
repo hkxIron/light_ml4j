@@ -3,6 +3,7 @@ package com.ml4j.network;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.Initializer;
 import com.ml4j.optimizer.Optimizer;
+import com.ml4j.regularizer.Regularizer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +25,15 @@ public class Network {
     @Getter
     private Initializer initializer;
 
-    public Network(List<Layer> layers, Loss lossLayer, Initializer initializer, Optimizer optimizer) {
+    @Getter
+    private Regularizer regularizer;
+
+    public Network(List<Layer> layers, Loss lossLayer, Initializer initializer, Optimizer optimizer, Regularizer regularizer) {
         this.mlpLayers = layers;
         this.lossLayer = lossLayer;
         this.initializer = initializer;
         this.optimizer = optimizer;
+        this.regularizer = regularizer;
     }
 
     public void build(int featSize) {
@@ -47,6 +52,7 @@ public class Network {
         int num = mlpLayers.size();
         assert num > 0;
         DenseVector in = x;
+        float loss = 0;
         for (int i = 0; i < num; i++) {
             Layer layer = mlpLayers.get(i);
             layer.setInput(in);
@@ -54,7 +60,8 @@ public class Network {
         }
         lossLayer.setInput(in);
         lossLayer.setLabel(y);
-        float loss = lossLayer.computeLoss();
+        loss += lossLayer.computeLoss();
+
 
         return loss;
     }
@@ -78,14 +85,14 @@ public class Network {
         }
     }
 
-    public float train(DenseVector x, DenseVector y){
-       float loss = forward(x, y);
-       backward();
-       update();
-       return loss;
+    public float train(DenseVector x, DenseVector y) {
+        float loss = forward(x, y);
+        backward();
+        update();
+        return loss;
     }
 
-    public float[] predict(DenseVector x){
+    public float[] predict(DenseVector x) {
         int num = mlpLayers.size();
         assert num > 0;
         DenseVector in = x;

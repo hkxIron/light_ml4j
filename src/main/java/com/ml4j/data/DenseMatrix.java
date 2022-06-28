@@ -18,6 +18,10 @@ public class DenseMatrix implements Tensor<float[][]> {
     // int[][] arr = {{1,2,3},{3,4,2}};
     private float[][] data;
 
+    public DenseMatrix(int row, int col) {
+        this.data = new float[row][col];
+    }
+
     public DenseMatrix(float[][] data) {
         this.data = data;
     }
@@ -30,6 +34,20 @@ public class DenseMatrix implements Tensor<float[][]> {
     @Override
     public float[][] data() {
         return this.data;
+    }
+
+    public DenseMatrix copy() {
+        int[] shape = getShape();
+        int M = shape[0];
+        int N = shape[1];
+        float[][] newData = new float[M][N];
+
+        for (int m = 0; m < M; m++) {
+            for (int n = 0; n < N; n++) {
+                newData[m][n] = data[m][n];
+            }
+        }
+        return new DenseMatrix(newData);
     }
 
     @Override

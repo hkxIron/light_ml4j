@@ -67,4 +67,13 @@ public class VectorUtils {
         }
         return c;
     }
+
+    public static float innerProduct(float[] a, float[] b) {
+        assert a.length == b.length;
+        float c = 0;
+        for (int i = 0; i < a.length; i++) {
+            c += a[i] * b[i];
+        }
+        return c;
+    }
 }

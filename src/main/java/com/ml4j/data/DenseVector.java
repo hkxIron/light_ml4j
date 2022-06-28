@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 public class DenseVector implements Tensor<float[]> {
     private float[] data;
 
+    public DenseVector(int size) {
+        this.data = new float[size];
+    }
+
     public DenseVector(float[] data) {
         this.data = data;
     }
@@ -112,11 +116,7 @@ public class DenseVector implements Tensor<float[]> {
 
     public float innerProduct(DenseVector b) {
         assert data.length == b.data.length;
-        float c = 0;
-        for (int i = 0; i < data.length; i++) {
-            c += data[i] * b.data[i];
-        }
-        return c;
+        return VectorUtils.innerProduct(this.data, b.data);
     }
 
     /**

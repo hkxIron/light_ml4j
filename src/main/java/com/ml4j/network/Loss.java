@@ -20,8 +20,6 @@ public abstract class Loss {
     //protected DenseVector delta; // 即为dL/dX
 
     public abstract float computeLoss(); // batch loss
-
-    public abstract DenseVector predict(); //
-
     public abstract DenseVector computeGrad();
+    public abstract DenseVector predict(); //
 }

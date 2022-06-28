@@ -11,6 +11,7 @@ import com.ml4j.math.Sigmoid;
 import com.ml4j.network.*;
 import com.ml4j.optimizer.FixedOptimizer;
 import com.ml4j.optimizer.Optimizer;
+import com.ml4j.regularizer.L2Regularizer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.mahout.classifier.evaluation.Auc;
@@ -106,7 +107,7 @@ public class TestNetwork {
         Loss loss = new SoftmaxWithCrossEntropyLoss();
         Initializer initializer = new NormalInitializer();
         Optimizer optimizer = new FixedOptimizer(5e-3f);
-        Network net = new Network(layers, loss, initializer, optimizer);
+        Network net = new Network(layers, loss, initializer, optimizer, new L2Regularizer(0));
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
@@ -148,7 +149,7 @@ public class TestNetwork {
         Loss loss = new BinaryLogitWithCrossEntropyLoss();
         Initializer initializer = new NormalInitializer();
         Optimizer optimizer = new FixedOptimizer(5e-3f);
-        Network net = new Network(layers, loss, initializer, optimizer);
+        Network net = new Network(layers, loss, initializer, optimizer, new L2Regularizer());
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
