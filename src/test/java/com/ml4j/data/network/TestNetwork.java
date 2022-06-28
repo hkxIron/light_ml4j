@@ -38,8 +38,8 @@ public class TestNetwork {
     public List<Pair<DenseVector[], DenseVector[]>> split(Pair<DenseVector[], DenseVector[]> xy, float trainRatio) {
         int all = xy.getLeft().length;
         int trainSize = (int) (all * trainRatio);
-        DenseVector x = xy.getLeft();
-        DenseVector y = xy.getRight();
+        DenseVector[] x = xy.getLeft();
+        DenseVector[] y = xy.getRight();
 
         DenseVector[] trainX = new DenseVector[trainSize];
         DenseVector[] trainY = new DenseVector[trainSize];
@@ -101,13 +101,13 @@ public class TestNetwork {
 
         List<Layer> layers = new ArrayList<>();
         //layers.add(new DenseLayer(5, sigmoid, "first"));
-        layers.add(new DenseLayer(5, sigmoid, "second"));
-        layers.add(new DenseLayer(4, new Identity(), "second"));
+        layers.add(new DenseLayer(5, sigmoid, "second", new L2Regularizer(1e-4f)));
+        layers.add(new DenseLayer(4, new Identity(), "second", new L2Regularizer(1e-4f)));
 
         Loss loss = new SoftmaxWithCrossEntropyLoss();
         Initializer initializer = new NormalInitializer();
         Optimizer optimizer = new FixedOptimizer(5e-3f);
-        Network net = new Network(layers, loss, initializer, optimizer, new L2Regularizer(0));
+        Network net = new Network(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
@@ -143,24 +143,23 @@ public class TestNetwork {
         int inputFeatureDim = 4;
 
         List<Layer> layers = new ArrayList<>();
-        layers.add(new DenseLayer(5, sigmoid, "first"));
-        layers.add(new DenseLayer(1, identity, "second"));
+        layers.add(new DenseLayer(5, sigmoid, "first", null));
+        layers.add(new DenseLayer(1, identity, "second", null));
 
         Loss loss = new BinaryLogitWithCrossEntropyLoss();
         Initializer initializer = new NormalInitializer();
         Optimizer optimizer = new FixedOptimizer(5e-3f);
-        Network net = new Network(layers, loss, initializer, optimizer, new L2Regularizer());
+        Network net = new Network(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
-        int epochNum = 40;
+        int epochNum = 100;
         int iter = 0;
-        List<Pair<DenseVector[], DenseVector[]>> xy = split(getIrisData(sampleNum), 0.7);
-        DenseVector[] x = xy.get(0).getLeft();
-        DenseVector[] oneHotY = xy(0).getRight();
+        Pair<DenseVector[], DenseVector[]> xy = getIrisData(sampleNum);
+        //List<Pair<DenseVector[], DenseVector[]>> xy = split(getIrisData(sampleNum), 0.7f);
+        DenseVector[] x = xy.getLeft();
+        DenseVector[] oneHotY = xy.getRight();
 
-        DenseVector[] testX = xy.get(1).getLeft();
-        DenseVector[] testOneHotY = xy(1).getRight();
 
         DenseVector[] binaryY = new DenseVector[oneHotY.length];
         int[] originLabel = new int[sampleNum];

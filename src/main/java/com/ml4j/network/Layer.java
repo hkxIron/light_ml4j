@@ -18,4 +18,5 @@ public interface Layer {
     void setInput(DenseVector x);
     int getOutSize();
     int getInSize();
+    float getRegularizationLoss(); // 可选, 计算正则化loss
 }

@@ -5,6 +5,7 @@ import com.ml4j.data.DenseVector;
 import com.ml4j.data.Initializer;
 import com.ml4j.math.ActivateFunction;
 import com.ml4j.optimizer.Optimizer;
+import com.ml4j.regularizer.Regularizer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,15 +32,17 @@ public class DenseLayer implements Layer {
     private DenseVector wxPlusBias;
     private DenseVector dLdb; // [1* outSize]
     private DenseMatrix dLdW;
+    private Regularizer regularizer;
 
     public DenseLayer(int outSize, ActivateFunction function) {
-        this(outSize, function, "dense");
+        this(outSize, function, "dense", null);
     }
 
-    public DenseLayer(int outSize, ActivateFunction function, String name) {
+    public DenseLayer(int outSize, ActivateFunction function, String name, Regularizer regularizer) {
         this.outSize = outSize;
         this.function = function;
         this.name = name;
+        this.regularizer = regularizer;
     }
 
     @Override
@@ -59,6 +62,16 @@ public class DenseLayer implements Layer {
     @Override
     public int getInSize() {
         return this.inSize;
+    }
+
+    @Override
+    public float getRegularizationLoss() {
+        float loss = 0;
+        if (this.regularizer != null) {
+            loss += regularizer.computeLoss(this.weight);
+            loss += regularizer.computeLoss(this.bias);
+        }
+        return loss;
     }
 
     /**
@@ -95,6 +108,11 @@ public class DenseLayer implements Layer {
 
         this.dLdb = delta.elementWiseMultiply(dPda, false); // [1* outSize]
         this.dLdW = diff.outerProduct(input);
+
+        if (this.regularizer != null) {
+            this.dLdW.add(regularizer.computeGrad(this.weight), true);
+            this.dLdb.add(regularizer.computeGrad(this.bias), true);
+        }
 
         // weight:[outSize, inSize]
         // diff:[1, outSize]

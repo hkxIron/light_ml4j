@@ -3,6 +3,8 @@ package com.ml4j.data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.function.Function;
+
 import static com.ml4j.data.VectorUtils.allEquals;
 
 /*
@@ -151,6 +153,32 @@ public class DenseMatrix implements Tensor<float[][]> {
         for (int m = 0; m < M; m++) {
             for (int n = 0; n < N; n++) {
                 newData[m][n] = data[m][n] * x;
+            }
+        }
+        if (inPlace) {
+            return this;
+        } else {
+            return new DenseMatrix(newData);
+        }
+    }
+
+    public DenseMatrix abs(boolean inPlace) {
+        return elementWise(Math::abs, inPlace);
+    }
+
+    public DenseMatrix elementWise(Function<Float, Float> func, boolean inPlace) {
+        int[] shape = getShape();
+        int M = shape[0];
+        int N = shape[1];
+        float[][] newData;
+        if (inPlace) {
+            newData = this.data;
+        } else {
+            newData = new float[M][N];
+        }
+        for (int m = 0; m < M; m++) {
+            for (int n = 0; n < N; n++) {
+                newData[m][n] = func.apply(data[m][n]);
             }
         }
         if (inPlace) {

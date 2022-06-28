@@ -22,6 +22,34 @@ public class VectorUtils {
         return sum;
     }
 
+    public static float[] sign(float[] x, boolean inPlace) {
+        float[] c;
+        if (inPlace) {
+            c = x;
+        } else {
+            c = new float[x.length];
+        }
+
+        for (int i = 0; i < x.length; i++) {
+            c[i] = Math.signum(x[i]);
+        }
+        return c;
+    }
+
+    public static float[] abs(float[] x, boolean inPlace) {
+        float[] c;
+        if (inPlace) {
+            c = x;
+        } else {
+            c = new float[x.length];
+        }
+
+        for (int i = 0; i < x.length; i++) {
+            c[i] = Math.abs(x[i]);
+        }
+        return c;
+    }
+
     public static int minIndex(float[] x) {
         int index = 0;
         for (int i = 0; i < x.length; i++) {

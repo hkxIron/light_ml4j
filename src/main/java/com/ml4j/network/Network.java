@@ -25,15 +25,13 @@ public class Network {
     @Getter
     private Initializer initializer;
 
-    @Getter
-    private Regularizer regularizer;
 
-    public Network(List<Layer> layers, Loss lossLayer, Initializer initializer, Optimizer optimizer, Regularizer regularizer) {
+    public Network(List<Layer> layers, Loss lossLayer, Initializer initializer,
+                   Optimizer optimizer) {
         this.mlpLayers = layers;
         this.lossLayer = lossLayer;
         this.initializer = initializer;
         this.optimizer = optimizer;
-        this.regularizer = regularizer;
     }
 
     public void build(int featSize) {
@@ -61,7 +59,6 @@ public class Network {
         lossLayer.setInput(in);
         lossLayer.setLabel(y);
         loss += lossLayer.computeLoss();
-
 
         return loss;
     }

@@ -45,4 +45,13 @@ public class TestMatrix {
         DenseVector c = a.multiply(b);
         System.out.println(normalGson.toJson(c));
     }
+
+    @Test
+    public void testAbs() {
+        //int[][] arr = {{1, 2, 3}, {3, 4, 2}};
+        DenseMatrix a = new DenseMatrix(new float[][]{
+                {1, -2},
+                {3, -4}});
+        System.out.println(normalGson.toJson(a.abs(true)));
+    }
 }
