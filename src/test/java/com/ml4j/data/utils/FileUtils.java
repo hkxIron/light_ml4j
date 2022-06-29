@@ -12,7 +12,6 @@ import java.nio.file.Paths;
  * Created by IntelliJ IDEA.
  *
  * Author: hukexin
- * Email: hukexin@xiaomi.com
  * Date: 22-6-10
  * Time: 下午5:41
  */

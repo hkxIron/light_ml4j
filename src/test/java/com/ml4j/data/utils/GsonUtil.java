@@ -6,7 +6,6 @@ import com.google.gson.*;
  * Created by IntelliJ IDEA.
  *
  * Author: hukexin
- * Email: hukexin@xiaomi.com
  * Date: 20-8-12
  * Time: 下午4:39
  */

@@ -3,13 +3,13 @@ package com.ml4j.regularizer;
 import com.ml4j.data.DenseMatrix;
 import com.ml4j.data.DenseVector;
 
-import static com.ml4j.data.VectorUtils.innerProduct;
+import static com.ml4j.initializer.VectorUtils.innerProduct;
 
 /*
  * Created by IntelliJ IDEA.
  *
  * Author: hukexin
- * Email: hukexin@xiaomi.com
+ *
  * Date: 22-6-28
  * Time: 上午10:22
  */

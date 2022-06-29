@@ -9,7 +9,6 @@ import static com.ml4j.data.utils.FileUtils.readFile;
  * Created by IntelliJ IDEA.
  *
  * Author: hukexin
- * Email: hukexin@xiaomi.com
  * Date: 22-6-17
  * Time: 下午6:43
  */

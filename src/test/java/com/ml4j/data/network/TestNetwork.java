@@ -3,7 +3,7 @@ package com.ml4j.data.network;
 import com.google.common.collect.Lists;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.Initializer;
-import com.ml4j.data.TruncatedNormalInitializer;
+import com.ml4j.initializer.TruncatedNormalInitializer;
 import com.ml4j.data.utils.GsonUtil;
 import com.ml4j.math.ActivateFunction;
 import com.ml4j.math.Identity;
@@ -21,7 +21,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.ml4j.data.VectorUtils.maxIndex;
+import static com.ml4j.initializer.VectorUtils.argMax;
 import static com.ml4j.data.utils.FileUtils.getFileAbsolutePath;
 import static com.ml4j.data.utils.FileUtils.readFile;
 import static com.ml4j.metric.Accuracy.calculateAcc;
@@ -30,7 +30,6 @@ import static com.ml4j.metric.Accuracy.calculateAcc;
  * Created by IntelliJ IDEA.
  *
  * Author: hukexin
- * Email: hukexin@xiaomi.com
  * Date: 22-6-27
  * Time: 上午11:33
  */
@@ -126,8 +125,8 @@ public class TestNetwork {
             for (int i = 0; i < sampleNum; i++) {
                 epochLoss += net.train(x[i], y[i]);
 
-                pred[i] = maxIndex(net.predict(x[i]));
-                label[i] = maxIndex(y[i].data());
+                pred[i] = argMax(net.predict(x[i]));
+                label[i] = argMax(y[i].data());
                 iter++;
             }
             float acc = calculateAcc(pred, label);
@@ -224,8 +223,8 @@ public class TestNetwork {
             for (int i = 0; i < sampleNum; i++) {
                 epochLoss += net.train(x[i], y[i]);
 
-                pred[i] = maxIndex(net.predict(x[i]));
-                label[i] = maxIndex(y[i].data());
+                pred[i] = argMax(net.predict(x[i]));
+                label[i] = argMax(y[i].data());
                 iter++;
             }
             float acc = calculateAcc(pred, label);

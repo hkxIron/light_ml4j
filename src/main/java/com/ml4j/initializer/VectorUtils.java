@@ -1,4 +1,4 @@
-package com.ml4j.data;
+package com.ml4j.initializer;
 
 /**
  * @author: kexin
@@ -50,7 +50,7 @@ public class VectorUtils {
         return c;
     }
 
-    public static int minIndex(float[] x) {
+    public static int argMin(float[] x) {
         int index = 0;
         for (int i = 0; i < x.length; i++) {
             if (x[i] < x[index]) {
@@ -60,7 +60,7 @@ public class VectorUtils {
         return index;
     }
 
-    public static int maxIndex(float[] x) {
+    public static int argMax(float[] x) {
         int index = 0;
         for (int i = 0; i < x.length; i++) {
             if (x[i] > x[index]) {

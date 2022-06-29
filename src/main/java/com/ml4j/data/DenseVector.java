@@ -1,5 +1,6 @@
 package com.ml4j.data;
 
+import com.ml4j.initializer.VectorUtils;
 import lombok.NoArgsConstructor;
 
 /**

@@ -1,7 +1,6 @@
 package com.ml4j.math;
 
-import static com.ml4j.data.VectorUtils.allEquals;
-import static com.ml4j.data.VectorUtils.maxIndex;
+import static com.ml4j.initializer.VectorUtils.argMax;
 
 /**
  * @author: kexin
@@ -62,7 +61,7 @@ public class FunctionUtils {
      */
     public static float[] softmax(float[] x) {
         float[] arr = new float[x.length];
-        float max = x[maxIndex(x)];
+        float max = x[argMax(x)];
         // 为了数值稳定性，每个值减去最小值，并不影响最终结果
         float sum = 0;
         for (int i = 0; i < x.length; i++) {

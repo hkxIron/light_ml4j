@@ -5,8 +5,8 @@ import com.ml4j.data.utils.GsonUtil;
 import com.ml4j.math.FunctionUtils;
 import org.junit.Test;
 
-import static com.ml4j.data.VectorUtils.allEquals;
-import static com.ml4j.data.VectorUtils.sum;
+import static com.ml4j.initializer.VectorUtils.allEquals;
+import static com.ml4j.initializer.VectorUtils.sum;
 import static com.ml4j.metric.Accuracy.calculateAcc;
 
 /**

@@ -7,7 +7,7 @@ import com.ml4j.data.DenseVector;
  * Created by IntelliJ IDEA.
  *
  * Author: hukexin
- * Email: hukexin@xiaomi.com
+ *
  * Date: 22-6-28
  * Time: 上午10:16
  */

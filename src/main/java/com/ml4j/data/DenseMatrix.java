@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Function;
 
-import static com.ml4j.data.VectorUtils.allEquals;
+import static com.ml4j.initializer.VectorUtils.allEquals;
 
 /*
  * Created by IntelliJ IDEA.

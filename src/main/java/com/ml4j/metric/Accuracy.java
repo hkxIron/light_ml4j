@@ -4,7 +4,6 @@ package com.ml4j.metric;
  * Created by IntelliJ IDEA.
  *
  * Author: hukexin
- * Email: hukexin@xiaomi.com
  * Date: 22-6-27
  * Time: 下午5:40
  */

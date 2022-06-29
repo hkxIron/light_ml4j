@@ -1,4 +1,8 @@
-package com.ml4j.data;
+package com.ml4j.initializer;
+
+import com.ml4j.data.DenseMatrix;
+import com.ml4j.data.DenseVector;
+import com.ml4j.data.Initializer;
 
 /**
  * @author: kexin
