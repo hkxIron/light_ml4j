@@ -3,6 +3,9 @@ package com.ml4j.data;
 import com.ml4j.initializer.VectorUtils;
 import lombok.NoArgsConstructor;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 /**
  * @author: kexin
  * @date: 2022/6/23 21:44
@@ -40,46 +43,43 @@ public class DenseVector implements Tensor<float[]> {
         this.data = floats;
     }
 
-    public DenseVector minus(DenseVector b, boolean inPlace) {
-        assert data.length == b.data.length;
-        float[] c;
-        if (inPlace) {
-            c = this.data;
-        } else {
-            c = new float[b.data.length];
-        }
-        for (int i = 0; i < data.length; i++) {
-            c[i] = data[i] - b.data[i];
-        }
-        if (inPlace) {
-            //System.arraycopy(c, 0, data, 0, data.length);
-            return this;
-        } else {
-            return new DenseVector(c);
-        }
+    public DenseVector minus(DenseVector vec, boolean inPlace) {
+        return elementWise(vec, (a, b) -> a - b, inPlace);
     }
 
-    public DenseVector add(DenseVector b, boolean inPlace) {
-        assert data.length == b.data.length;
-        //float[] c = new float[b.data.length];
-        float[] c;
-        if (inPlace) {
-            c = this.data;
-        } else {
-            c = new float[b.data.length];
-        }
-        for (int i = 0; i < data.length; i++) {
-            c[i] = data[i] + b.data[i];
-        }
-        if (inPlace) {
-            //System.arraycopy(c, 0, data, 0, data.length);
-            return this;
-        } else {
-            return new DenseVector(c);
-        }
+    public DenseVector add(DenseVector vec, boolean inPlace) {
+        return elementWise(vec, (a, b) -> a + b, inPlace);
     }
 
     public DenseVector multiply(float x, boolean inPlace) {
+        return elementWise(a -> a * x, inPlace);
+    }
+
+
+    public DenseVector elementWiseMultiply(DenseVector vec, boolean inPlace) {
+        return elementWise(vec, (a, b) -> a * b, inPlace);
+    }
+
+    public DenseVector elementWise(DenseVector b, BiFunction<Float, Float, Float> function, boolean inPlace) {
+        assert data.length == b.data.length;
+        float[] c;
+        if (inPlace) {
+            c = this.data;
+        } else {
+            c = new float[b.data.length];
+        }
+        for (int i = 0; i < data.length; i++) {
+            c[i] = function.apply(data[i], b.data[i]);
+        }
+        if (inPlace) {
+            //System.arraycopy(c, 0, data, 0, data.length);
+            return this;
+        } else {
+            return new DenseVector(c);
+        }
+    }
+
+    public DenseVector elementWise(Function<Float, Float> function, boolean inPlace) {
         float[] c;
         if (inPlace) {
             c = this.data;
@@ -87,28 +87,9 @@ public class DenseVector implements Tensor<float[]> {
             c = new float[data.length];
         }
         for (int i = 0; i < data.length; i++) {
-            c[i] = data[i] * x;
+            c[i] = function.apply(data[i]);
         }
         if (inPlace) {
-            return this;
-        } else {
-            return new DenseVector(c);
-        }
-    }
-
-    public DenseVector elementWiseMultiply(DenseVector b, boolean inPlace) {
-        assert data.length == b.data.length;
-        float[] c;
-        if (inPlace) {
-            c = this.data;
-        } else {
-            c = new float[b.data.length];
-        }
-        for (int i = 0; i < data.length; i++) {
-            c[i] = data[i] * b.data[i];
-        }
-        if (inPlace) {
-            //System.arraycopy(c, 0, data, 0, data.length);
             return this;
         } else {
             return new DenseVector(c);
