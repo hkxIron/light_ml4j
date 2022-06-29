@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.scu.ml4j</groupId>
-    <artifactId>light_ml4j</artifactId>
+    <groupId>com.light_ml4j</groupId>
+    <artifactId>light_recommend4j</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
