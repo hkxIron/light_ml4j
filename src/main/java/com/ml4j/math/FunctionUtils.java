@@ -20,6 +20,11 @@ public class FunctionUtils {
     }
 
     public static float sigmoid(float x) {
+        if (x >= 10) {
+            return 1f;
+        } else if (x <= -10) {
+            return 0f;
+        }
         double result = 1 / (1 + Math.pow(Math.E, -x));
         return (float) result;
     }
