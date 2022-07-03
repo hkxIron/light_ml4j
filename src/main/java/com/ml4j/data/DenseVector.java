@@ -1,19 +1,20 @@
 package com.ml4j.data;
 
 import com.ml4j.initializer.VectorUtils;
-import lombok.NoArgsConstructor;
 
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 /**
  * @author: kexin
  * @date: 2022/6/23 21:44
  **/
-@NoArgsConstructor
 public class DenseVector implements Tensor<float[]> {
     private float[] data;
 
+    public DenseVector() {
+    }
     public DenseVector(int size) {
         this.data = new float[size];
     }
@@ -26,6 +27,16 @@ public class DenseVector implements Tensor<float[]> {
         float[] newData = new float[data.length];
         System.arraycopy(data, 0, newData, 0, data.length);
         return new DenseVector(newData);
+    }
+
+    @Override
+    public boolean equalsInTolerance(Tensor vec, float eps) {
+        boolean isDense = vec instanceof DenseVector;
+        if (!isDense) {
+            return false;
+        }
+        return elementWise((DenseVector) vec, (a, b) -> Math.abs(a - b), false)
+                .sum() <= eps;
     }
 
     @Override
@@ -51,12 +62,24 @@ public class DenseVector implements Tensor<float[]> {
         return elementWise(vec, (a, b) -> a + b, inPlace);
     }
 
+    public float reduce(float initValue, final BinaryOperator<Float> function) {
+        float res = initValue;
+        for (float x : data) {
+            res = function.apply(res, x);
+        }
+        return res;
+    }
+
+    public float sum() {
+        return reduce(0, (a, b) -> a + b);
+    }
+
     public DenseVector multiply(float x, boolean inPlace) {
         return elementWise(a -> a * x, inPlace);
     }
 
 
-    public DenseVector elementWiseMultiply(DenseVector vec, boolean inPlace) {
+    public DenseVector multiply(DenseVector vec, boolean inPlace) {
         return elementWise(vec, (a, b) -> a * b, inPlace);
     }
 
@@ -72,7 +95,6 @@ public class DenseVector implements Tensor<float[]> {
             c[i] = function.apply(data[i], b.data[i]);
         }
         if (inPlace) {
-            //System.arraycopy(c, 0, data, 0, data.length);
             return this;
         } else {
             return new DenseVector(c);

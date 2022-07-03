@@ -6,8 +6,6 @@ import com.ml4j.data.Initializer;
 
 import java.util.Arrays;
 
-import static com.ml4j.math.FunctionUtils.clip;
-
 /**
  * @author: kexin
  * @date: 2022/6/25 17:04

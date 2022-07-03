@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.ml4j.initializer.VectorUtils.argMax;
-import static com.ml4j.data.utils.FileUtils.getFileAbsolutePath;
+import static com.ml4j.data.utils.FileUtils.readFileByAbsolutePath;
 import static com.ml4j.data.utils.FileUtils.readFile;
 import static com.ml4j.metric.Accuracy.calculateAcc;
 
@@ -60,7 +60,7 @@ public class TestNetwork {
     }
 
     public Pair<DenseVector[], DenseVector[]> getIrisData(int sampleNum) throws Exception {
-        String content = readFile(getFileAbsolutePath("iris.csv"));
+        String content = readFile(readFileByAbsolutePath("iris.csv"));
         DenseVector[] xs = new DenseVector[sampleNum];
         DenseVector[] ys = new DenseVector[sampleNum];
 
@@ -171,7 +171,7 @@ public class TestNetwork {
             binaryY[i] = new DenseVector(new float[]{pos});
         }
 
-        System.out.println("posNUm:" + posNum + " negNum:" + (sampleNum - posNum) + " sampleNum:" + sampleNum);
+        System.out.println("posNum:" + posNum + " negNum:" + (sampleNum - posNum) + " sampleNum:" + sampleNum);
         float[] predScore = new float[sampleNum];
 
         for (int epoch = 0; epoch < epochNum; epoch++) {

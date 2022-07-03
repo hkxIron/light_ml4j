@@ -5,7 +5,7 @@ A framework implemented only in native java.
 Due to the limited power consumption and memory on mobile devices, 
 other third-party libraries such as tensorflow Lite often cannot 
 be successfully embedded into mobile applications due to their 
-large dependent package size. Therefore, the package is dedicated 
+large dependent package maxSize. Therefore, the package is dedicated 
 to providing a recommendation framework that can be trained and predicted 
 on mobile phones, also known as federated learning recommendation, 
 but it is not suitable for task processing with dense features such as 

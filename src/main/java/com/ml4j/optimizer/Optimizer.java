@@ -1,19 +1,23 @@
 package com.ml4j.optimizer;
 
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * @author: kexin
  * @date: 2022/6/25 16:07
  **/
-@Getter
-@NoArgsConstructor
 public abstract class Optimizer {
     protected float initLearningRate = 0;
     protected int globalStep = 0;
+
+    public Optimizer() {
+    }
+
+    public float getInitLearningRate() {
+        return initLearningRate;
+    }
+
+    public int getGlobalStep() {
+        return globalStep;
+    }
 
     public int addStep(int step) {
         this.globalStep += step;

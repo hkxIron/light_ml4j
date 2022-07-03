@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
  * @author: kexin
  * @date: 2022/6/25 16:09
  **/
-@NoArgsConstructor
 public class ExponentDecayOptimizer extends Optimizer {
     private float decayRate; // 0.99
     private int decaySteps; // 10000
     private float lr;
     private int lastStepStage; //global_step/decay_steps
+
+    public ExponentDecayOptimizer() {
+    }
 
     public ExponentDecayOptimizer(float initLearningRate, float decayRate, int decaySteps) {
         this.initLearningRate = initLearningRate;

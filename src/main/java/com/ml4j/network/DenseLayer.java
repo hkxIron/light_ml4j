@@ -14,25 +14,39 @@ import lombok.Setter;
  * @date: 2022/6/23 23:10
  **/
 public class DenseLayer implements Layer {
-    @Getter
     private String name;
-    @Setter
-    private DenseVector input; // [1, inSize]
-
-    private int outSize;
-
-    @Getter
     private int inSize;
-    private ActivateFunction function;
 
-    @Getter
     private DenseMatrix weight; // [outSize, inSize]
-    @Getter
     private DenseVector bias; // 输出有多少个节点，就有多少个bias, [1, outSize]
     private DenseVector wxPlusBias;
     private DenseVector dLdb; // [1* outSize]
     private DenseMatrix dLdW;
     private Regularizer regularizer;
+    private int outSize;
+    private ActivateFunction function;
+
+    private DenseVector input; // [1, inSize]
+
+    public void setInput(DenseVector input) {
+        this.input = input;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public DenseMatrix getWeight() {
+        return weight;
+    }
+
+    public DenseVector getBias() {
+        return bias;
+    }
+
+    public DenseVector getInput() {
+        return input;
+    }
 
     public DenseLayer(int outSize, ActivateFunction function) {
         this(outSize, function, "dense", null);
@@ -104,9 +118,9 @@ public class DenseLayer implements Layer {
     @Override
     public DenseVector backward(DenseVector delta) {
         DenseVector dPda = function.gradient(this.wxPlusBias, false);
-        DenseVector diff = delta.elementWiseMultiply(dPda, false); // [1* outSize]
+        DenseVector diff = delta.multiply(dPda, false); // [1* outSize]
 
-        this.dLdb = delta.elementWiseMultiply(dPda, false); // [1* outSize]
+        this.dLdb = delta.multiply(dPda, false); // [1* outSize]
         this.dLdW = diff.outerProduct(input);
 
         if (this.regularizer != null) {

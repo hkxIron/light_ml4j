@@ -1,8 +1,9 @@
 package com.ml4j.data;
 
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 import static com.ml4j.initializer.VectorUtils.allEquals;
@@ -15,10 +16,12 @@ import static com.ml4j.initializer.VectorUtils.allEquals;
  * Time: 下午5:42
  */
 @Slf4j
-@NoArgsConstructor
 public class DenseMatrix implements Tensor<float[][]> {
     // int[][] arr = {{1,2,3},{3,4,2}};
     private float[][] data;
+
+    public DenseMatrix() {
+    }
 
     public DenseMatrix(int row, int col) {
         this.data = new float[row][col];
@@ -50,6 +53,16 @@ public class DenseMatrix implements Tensor<float[][]> {
             }
         }
         return new DenseMatrix(newData);
+    }
+
+    @Override
+    public boolean equalsInTolerance(Tensor vec, float eps) {
+        boolean isMatrix = vec instanceof DenseMatrix;
+        if (!isMatrix) {
+            return false;
+        }
+        DenseMatrix mat = (DenseMatrix) vec;
+        return this.elementWise(mat, (a, b) -> Math.abs(a - b), false).sum() < eps;
     }
 
     @Override
@@ -106,7 +119,6 @@ public class DenseMatrix implements Tensor<float[][]> {
         int M = shape[0];
         int N = shape[1];
 
-
         float[] dot = new float[M];
         for (int r = 0; r < M; r++) {
             dot[r] = new DenseVector(data[r]).innerProduct(vec);
@@ -117,49 +129,12 @@ public class DenseMatrix implements Tensor<float[][]> {
     public DenseMatrix add(DenseMatrix mat, boolean inPlace) {
         int[] shape = getShape();
         int[] matShape = mat.getShape();
-        assert shape.length == 2;
         assert allEquals(shape, matShape);
-
-        int M = shape[0];
-        int N = shape[1];
-        float[][] newData;
-        if (inPlace) {
-            newData = this.data;
-        } else {
-            newData = new float[M][N];
-        }
-        for (int m = 0; m < M; m++) {
-            for (int n = 0; n < N; n++) {
-                newData[m][n] = data[m][n] + mat.data[m][n];
-            }
-        }
-        if (inPlace) {
-            return this;
-        } else {
-            return new DenseMatrix(newData);
-        }
+        return this.elementWise(mat, (a, b) -> a + b, inPlace);
     }
 
     public DenseMatrix multiply(float x, boolean inPlace) {
-        int[] shape = getShape();
-        int M = shape[0];
-        int N = shape[1];
-        float[][] newData;
-        if (inPlace) {
-            newData = this.data;
-        } else {
-            newData = new float[M][N];
-        }
-        for (int m = 0; m < M; m++) {
-            for (int n = 0; n < N; n++) {
-                newData[m][n] = data[m][n] * x;
-            }
-        }
-        if (inPlace) {
-            return this;
-        } else {
-            return new DenseMatrix(newData);
-        }
+        return elementWise((a)->a*x, inPlace);
     }
 
     public DenseMatrix abs(boolean inPlace) {
@@ -188,11 +163,73 @@ public class DenseMatrix implements Tensor<float[][]> {
         }
     }
 
+    public float sum() {
+        return reduceSum(0).sum();
+    }
+
+    public DenseVector reduceSum(int axis) {
+        return reduce(axis, 0, (a, b) -> a + b);
+    }
+
     /**
-     * @param row
-     * @param col
+     * @param axis      which axis to reduce, 0 : reduce on row,  1: reduce on col
+     * @param initValue
+     * @param function
      * @return
      */
+    public DenseVector reduce(int axis, float initValue, BinaryOperator<Float> function) {
+        assert axis == 0 || axis == 1;
+        int[] shape = getShape();
+        int M = shape[0];
+        int N = shape[1];
+        float[] vals;
+        if (axis == 0) {
+            vals = new float[N];
+            float res = initValue;
+            for (int n = 0; n < N; n++) {
+                for (int m = 0; m < M; m++) {
+                    res = function.apply(res, data[m][n]);
+                }
+                vals[n] = res;
+            }
+        } else { // axis ==1
+            vals = new float[M];
+            float res = initValue;
+            for (int m = 0; m < M; m++) {
+                for (int n = 0; n < N; n++) {
+                    res = function.apply(res, data[m][n]);
+                }
+                vals[m] = res;
+            }
+        }
+        return new DenseVector(vals);
+    }
+
+    public DenseMatrix elementWise(DenseMatrix mat, BiFunction<Float, Float, Float> func, boolean inPlace) {
+        int[] shape = getShape();
+        int M = shape[0];
+        int N = shape[1];
+        assert allEquals(shape, mat.getShape());
+
+        float[][] newData;
+        if (inPlace) {
+            newData = this.data;
+        } else {
+            newData = new float[M][N];
+        }
+        for (int m = 0; m < M; m++) {
+            for (int n = 0; n < N; n++) {
+                newData[m][n] = func.apply(data[m][n], mat.data[m][n]);
+            }
+        }
+        if (inPlace) {
+            return this;
+        } else {
+            return new DenseMatrix(newData);
+        }
+    }
+
+    /*
     public DenseVector copyVector(int row, int col) {
         int[] shape = getShape();
         assert shape.length == 2;
@@ -216,4 +253,5 @@ public class DenseMatrix implements Tensor<float[][]> {
             throw new RuntimeException("must specify at least one row or one column");
         }
     }
+    */
 }

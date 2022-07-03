@@ -2,7 +2,7 @@ package com.ml4j.data;
 
 import org.junit.Test;
 
-import static com.ml4j.data.utils.FileUtils.getFileAbsolutePath;
+import static com.ml4j.data.utils.FileUtils.readFileByAbsolutePath;
 import static com.ml4j.data.utils.FileUtils.readFile;
 
 /*
@@ -15,7 +15,7 @@ import static com.ml4j.data.utils.FileUtils.readFile;
 public class TestRead {
     @Test
     public void testReadFile() throws Exception {
-        String content = readFile(getFileAbsolutePath("iris.csv"));
+        String content = readFile(readFileByAbsolutePath("iris.csv"));
         System.out.println("file:\n"+ content);
     }
     @Test

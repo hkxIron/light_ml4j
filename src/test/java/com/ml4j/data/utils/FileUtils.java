@@ -16,14 +16,14 @@ import java.nio.file.Paths;
  * Time: 下午5:41
  */
 public class FileUtils {
-    public static String getFileAbsolutePath(String relPath) throws URISyntaxException {
+    public static String readFileByAbsolutePath(String relPath) throws URISyntaxException {
         URL res = FileUtils.class.getClassLoader().getResource(relPath);
         File file = Paths.get(res.toURI()).toFile();
         return file.getAbsolutePath();
     }
 
     public static String readFile(String filePath) throws IOException {
-        String content = com.google.common.io.Files.asCharSource(new File(filePath), StandardCharsets.UTF_8).read();
-        return content;
+        return com.google.common.io.Files.asCharSource(new File(filePath), StandardCharsets.UTF_8)
+                .read();
     }
 }

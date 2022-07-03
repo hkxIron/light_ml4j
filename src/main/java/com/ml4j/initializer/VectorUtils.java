@@ -1,10 +1,28 @@
 package com.ml4j.initializer;
 
+import java.util.List;
+
 /**
  * @author: kexin
  * @date: 2022/6/25 18:07
  **/
 public class VectorUtils {
+    public static int[] toIntArray(List<Integer> data) {
+        int[] arr = new int[data.size()];
+        for (int i = 0; i < data.size(); i++) {
+            arr[i] = data.get(i);
+        }
+        return arr;
+    }
+
+    public static float[] toFloatArray(List<Float> vals) {
+        float[] arr = new float[vals.size()];
+        for (int i = 0; i < vals.size(); i++) {
+            arr[i] = vals.get(i);
+        }
+        return arr;
+    }
+
     public static boolean allEquals(int[] a, int[] b) {
         assert a.length == b.length;
         boolean equals = true;

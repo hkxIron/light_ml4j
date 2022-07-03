@@ -3,9 +3,6 @@ package com.ml4j.network;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.Initializer;
 import com.ml4j.optimizer.Optimizer;
-import com.ml4j.regularizer.Regularizer;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -16,15 +13,26 @@ import java.util.List;
  **/
 @Slf4j
 public class Network {
-    @Getter
     private Optimizer optimizer;
-    @Getter
     private List<Layer> mlpLayers;
-    @Getter
     private Loss lossLayer;
-    @Getter
     private Initializer initializer;
 
+    public Optimizer getOptimizer() {
+        return optimizer;
+    }
+
+    public List<Layer> getMlpLayers() {
+        return mlpLayers;
+    }
+
+    public Loss getLossLayer() {
+        return lossLayer;
+    }
+
+    public Initializer getInitializer() {
+        return initializer;
+    }
 
     public Network(List<Layer> layers, Loss lossLayer, Initializer initializer,
                    Optimizer optimizer) {

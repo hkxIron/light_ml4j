@@ -8,4 +8,6 @@ public interface Tensor<T> {
     int[] getShape();
     T data();
     void data(T t);
+    Tensor copy();
+    boolean equalsInTolerance(Tensor vec, float eps);
 }
