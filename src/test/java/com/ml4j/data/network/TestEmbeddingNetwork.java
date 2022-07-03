@@ -1,0 +1,95 @@
+package com.ml4j.data.network;
+
+import com.google.common.collect.Lists;
+import com.ml4j.data.DenseVector;
+import com.ml4j.data.utils.GsonUtil;
+import com.ml4j.initializer.Initializer;
+import com.ml4j.initializer.TruncatedNormalInitializer;
+import com.ml4j.math.ActivateFunction;
+import com.ml4j.math.Identity;
+import com.ml4j.math.Sigmoid;
+import com.ml4j.network.*;
+import com.ml4j.optimizer.ExponentDecayOptimizer;
+import com.ml4j.optimizer.FixedOptimizer;
+import com.ml4j.optimizer.Optimizer;
+import com.ml4j.regularizer.L2Regularizer;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.mahout.classifier.evaluation.Auc;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.ml4j.data.utils.FileUtils.readFile;
+import static com.ml4j.data.utils.FileUtils.readFileByAbsolutePath;
+import static com.ml4j.initializer.VectorUtils.argMax;
+import static com.ml4j.metric.Accuracy.calculateAcc;
+
+/*
+ * Created by IntelliJ IDEA.
+ *
+ * Author: hukexin
+ * Date: 22-6-27
+ * Time: 上午11:33
+ */
+@Slf4j
+public class TestEmbeddingNetwork {
+    @Test
+    public void testBinaryCrossEntropyLoss() throws Exception {
+        ActivateFunction sigmoid = new Sigmoid();
+        ActivateFunction identity = new Identity();
+        int inputFeatureDim = 4;
+
+        List<Layer> layers = new ArrayList<>();
+        layers.add(new DenseLayer(5, sigmoid, "first", null));
+        layers.add(new DenseLayer(1, identity, "second", null));
+
+        Loss loss = new BinaryLogitWithCrossEntropyLoss();
+        Initializer initializer = new TruncatedNormalInitializer();
+        Optimizer optimizer = new FixedOptimizer(5e-3f);
+        Network net = new Network(layers, loss, initializer, optimizer);
+        net.build(inputFeatureDim);
+
+        int sampleNum = 120;
+        int epochNum = 100;
+        int iter = 0;
+
+        Pair<DenseVector[], DenseVector[]> xy = null;
+        // TODO
+        DenseVector[] x = xy.getLeft();
+        DenseVector[] oneHotY = xy.getRight();
+
+
+        DenseVector[] binaryY = new DenseVector[oneHotY.length];
+        int[] originLabel = new int[sampleNum];
+        int posNum = 0;
+        for (int i = 0; i < oneHotY.length; i++) {
+            int pos = oneHotY[i].data()[0] == 1 ? 1 : 0;
+            posNum += pos;
+            originLabel[i] = pos;
+            binaryY[i] = new DenseVector(new float[]{pos});
+        }
+
+        System.out.println("posNum:" + posNum + " negNum:" + (sampleNum - posNum) + " sampleNum:" + sampleNum);
+        float[] predScore = new float[sampleNum];
+
+        for (int epoch = 0; epoch < epochNum; epoch++) {
+            float epochLoss = 0;
+            Auc auc = new Auc();
+            for (int i = 0; i < sampleNum; i++) {
+                epochLoss += net.train(x[i], binaryY[i]);
+                //pred[i] = net.predict(x[i])[0];
+                int label = (int) binaryY[i].data()[0];
+                float pred = net.predict(x[i]).data()[0];
+                predScore[i] = pred;
+                auc.add(label, pred);
+                iter++;
+            }
+            log.info("epoch:{} iter:{} train loss:{} train auc:{}", epoch, iter, epochLoss / sampleNum, auc.auc());
+        }
+        log.info("pred :{}", GsonUtil.normalGson.toJson(predScore));
+        log.info("label:{}", GsonUtil.normalGson.toJson(originLabel));
+    }
+}
+

@@ -34,11 +34,13 @@ public class Network {
         int layerNum = layers.size();
         log.info("layerNum:{} featSize:{}", layerNum, featSize);
         assert layerNum > 0;
-        layers.get(0).initWeights(featSize, initializer);
+        layers.get(0).setInSize(featSize);
+        layers.get(0).initWeights(initializer);
 
         for (int i = 1; i < layerNum; i++) {
-            int inSize = layers.get(i - 1).getOutSize();
-            layers.get(i).initWeights(inSize, initializer);
+            int outSizeLastLayer = layers.get(i - 1).getOutSize();
+            layers.get(i).setInSize(outSizeLastLayer);
+            layers.get(i).initWeights(initializer);
         }
     }
 

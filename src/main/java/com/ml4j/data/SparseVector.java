@@ -73,8 +73,7 @@ public class SparseVector extends Tensor<Map<Integer, Float>> {
         if (vec.maxSize != maxSize || vec.indToVal.size() != vec.indToVal.size()) {
             return false;
         }
-        return elementWise(vec, (a, b) -> Math.abs(a - b), false)
-                .sum() <= Math.abs(eps);
+        return super.equalsInTolerance(vec, eps);
     }
 
     public float get(int i) {
