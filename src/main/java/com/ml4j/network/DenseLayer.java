@@ -2,12 +2,10 @@ package com.ml4j.network;
 
 import com.ml4j.data.DenseMatrix;
 import com.ml4j.data.DenseVector;
-import com.ml4j.data.Initializer;
+import com.ml4j.initializer.Initializer;
 import com.ml4j.math.ActivateFunction;
 import com.ml4j.optimizer.Optimizer;
 import com.ml4j.regularizer.Regularizer;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author: kexin
@@ -97,7 +95,7 @@ public class DenseLayer implements Layer {
      */
     @Override
     public DenseVector forward() {
-        this.wxPlusBias = weight.multiply(input)
+        this.wxPlusBias = (DenseVector) weight.multiply(input)
                 .add(bias, true); // [outsize]
         DenseVector p = function.activate(wxPlusBias, false);
         return p;
@@ -118,9 +116,9 @@ public class DenseLayer implements Layer {
     @Override
     public DenseVector backward(DenseVector delta) {
         DenseVector dPda = function.gradient(this.wxPlusBias, false);
-        DenseVector diff = delta.multiply(dPda, false); // [1* outSize]
+        DenseVector diff = (DenseVector) delta.multiply(dPda, false); // [1* outSize]
 
-        this.dLdb = delta.multiply(dPda, false); // [1* outSize]
+        this.dLdb = (DenseVector) delta.multiply(dPda, false); // [1* outSize]
         this.dLdW = diff.outerProduct(input);
 
         if (this.regularizer != null) {

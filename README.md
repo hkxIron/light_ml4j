@@ -22,8 +22,9 @@ For simple recommendation models, the features are generally sparse, so it does 
  require high computing power, The framework can be well adapted to this task.
 
 ## Features
-- MLP
-- softmax,logistic,square loss
+- support MLP
+- support sparse LR 
+- loss: softmax,logistic,square loss
 
 ##TODO:
 - support spare feature, embeddings

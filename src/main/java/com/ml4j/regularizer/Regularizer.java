@@ -1,7 +1,6 @@
 package com.ml4j.regularizer;
 
-import com.ml4j.data.DenseMatrix;
-import com.ml4j.data.DenseVector;
+import com.ml4j.data.Tensor;
 
 /*
  * Created by IntelliJ IDEA.
@@ -18,9 +17,7 @@ public abstract class Regularizer {
       this.alpha = alpha;
    }
 
-   public abstract float computeLoss(DenseMatrix matrix);
-   public abstract float computeLoss(DenseVector vector);
+   public abstract float computeLoss(Tensor input);
 
-   public abstract DenseMatrix computeGrad(DenseMatrix matrix);
-   public abstract DenseVector computeGrad(DenseVector vector);
+   public abstract Tensor computeGrad(Tensor input);
 }

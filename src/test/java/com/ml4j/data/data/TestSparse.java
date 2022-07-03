@@ -25,7 +25,7 @@ public class TestSparse {
             put(3, 0.2f);
         }});
 
-        SparseVector vec2 = vec0.add(vec1);
+        SparseVector vec2 = (SparseVector) vec0.add(vec1, false);
         System.out.println(normalGson.toJson(vec2));
 
         Map<Integer, Float> map = new HashMap<Integer, Float>();
@@ -35,6 +35,6 @@ public class TestSparse {
         assert vec2.equalsInTolerance(new SparseVector(4, map), 1e-5f);
         assert vec0.innerProduct(vec1) == 10.5f;
 
-        System.out.println(normalGson.toJson(vec0.minus(vec1)));
+        System.out.println(normalGson.toJson(vec0.minus(vec1, false)));
     }
 }

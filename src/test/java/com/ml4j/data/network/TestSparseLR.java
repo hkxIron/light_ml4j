@@ -3,7 +3,7 @@ package com.ml4j.data.network;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.data.DataLoader;
 import com.ml4j.data.data.SparseDataSet;
-import com.ml4j.network.SparseLogisticRegression;
+import com.ml4j.logisticregression.SparseLogisticRegression;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.mahout.classifier.evaluation.Auc;
 import org.junit.Test;

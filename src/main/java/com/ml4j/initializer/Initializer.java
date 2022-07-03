@@ -1,5 +1,8 @@
-package com.ml4j.data;
+package com.ml4j.initializer;
 
+import com.ml4j.data.DenseMatrix;
+import com.ml4j.data.DenseVector;
+import com.ml4j.data.Tensor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,8 +17,7 @@ public abstract class Initializer {
     private float mean = 0;
     private float std = 1;
 
-    public Initializer() {
-    }
+    public Initializer() { }
 
     public float getMean() {
         return mean;
@@ -30,7 +32,5 @@ public abstract class Initializer {
         this.std = std;
     }
 
-    public abstract void init(DenseVector v);
-
-    public abstract void init(DenseMatrix x);
+    public abstract void init(Tensor v);
 }

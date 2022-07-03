@@ -1,10 +1,8 @@
 package com.ml4j.network;
 
-import com.ml4j.data.DenseMatrix;
 import com.ml4j.data.DenseVector;
-import com.ml4j.data.Initializer;
+import com.ml4j.initializer.Initializer;
 import com.ml4j.optimizer.Optimizer;
-import lombok.Getter;
 
 /**
  * @author: kexin

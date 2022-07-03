@@ -12,7 +12,7 @@ import java.util.function.Function;
  * @author: kexin
  * @date: 2022/6/29 10:47
  **/
-public class SparseVector implements Tensor<Map<Integer, Float>> {
+public class SparseVector extends Tensor<Map<Integer, Float>> {
     @Getter
     private final Map<Integer, Float> indToVal; //  0,  7,  9
     private int maxSize;
@@ -56,16 +56,24 @@ public class SparseVector implements Tensor<Map<Integer, Float>> {
     }
 
     @Override
+    public Tensor valuesLike(float x) {
+        SparseVector vec = new SparseVector(maxSize);
+        this.indToVal.forEach((k, v) -> {
+            vec.indToVal.put(k, x);
+        });
+        return vec;
+    }
+
+    @Override
     public boolean equalsInTolerance(Tensor vec0, float eps) {
-        boolean res = false;
-        if(!(vec0 instanceof SparseVector)){
-           return false;
+        if (!(vec0 instanceof SparseVector)) {
+            return false;
         }
         SparseVector vec = (SparseVector) vec0;
         if (vec.maxSize != maxSize || vec.indToVal.size() != vec.indToVal.size()) {
             return false;
         }
-        return this.elementWise(vec, (a, b) -> Math.abs(a - b))
+        return elementWise(vec, (a, b) -> Math.abs(a - b), false)
                 .sum() <= Math.abs(eps);
     }
 
@@ -116,10 +124,16 @@ public class SparseVector implements Tensor<Map<Integer, Float>> {
         return this.reduce(0, (a, b) -> a + b);
     }
 
+    /**
+     * 计算所有元素的乘积
+     *
+     * @return
+     */
     public float product() {
         return this.reduce(1, (a, b) -> a * b);
     }
 
+    @Override
     public SparseVector elementWise(final Function<Float, Float> function, boolean inPlace) {
         Map<Integer, Float> weight;
         if (inPlace) {
@@ -137,6 +151,29 @@ public class SparseVector implements Tensor<Map<Integer, Float>> {
         }
     }
 
+    @Override
+    public SparseVector elementWise(final Tensor vec0, final BiFunction<Float, Float, Float> function, boolean inPlace) {
+        SparseVector vec = (SparseVector) vec0;
+
+        assert this.maxSize == vec.maxSize;
+        List<Integer> keys = union(this.indToVal.keySet(), vec.indToVal.keySet());
+        Map<Integer, Float> weight;
+        if (inPlace) {
+            weight = this.indToVal;
+        } else {
+            weight = new HashMap<>(keys.size());
+        }
+        for (Integer ind : keys) {
+            weight.put(ind, function.apply(this.get(ind), vec.get(ind)));
+        }
+        if (inPlace) {
+            return this;
+        } else {
+            return new SparseVector(this.maxSize, weight);
+        }
+    }
+
+    /*
     public SparseVector multiply(float x, boolean inPlace) {
         return elementWise((a) -> a * x, inPlace);
     }
@@ -156,17 +193,9 @@ public class SparseVector implements Tensor<Map<Integer, Float>> {
     public SparseVector abs(boolean inPlace) {
         return elementWise(Math::abs, inPlace);
     }
+    */
 
-    public SparseVector elementWise(final SparseVector vec, final BiFunction<Float, Float, Float> function) {
-        assert this.maxSize == vec.maxSize;
-        List<Integer> keys = union(this.indToVal.keySet(), vec.indToVal.keySet());
-        Map<Integer, Float> weight = new HashMap<>(keys.size());
-        for (Integer ind : keys) {
-            weight.put(ind, function.apply(this.get(ind), vec.get(ind)));
-        }
-        return new SparseVector(this.maxSize, weight);
-    }
-
+    /*
     public SparseVector multiply(SparseVector x) {
         return elementWise(x, (a, b) -> a * b);
     }
@@ -178,4 +207,5 @@ public class SparseVector implements Tensor<Map<Integer, Float>> {
     public SparseVector minus(SparseVector x) {
         return elementWise(x, (a, b) -> a - b);
     }
+    */
 }

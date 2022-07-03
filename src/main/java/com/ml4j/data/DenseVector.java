@@ -2,6 +2,7 @@ package com.ml4j.data;
 
 import com.ml4j.initializer.VectorUtils;
 
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -10,7 +11,7 @@ import java.util.function.Function;
  * @author: kexin
  * @date: 2022/6/23 21:44
  **/
-public class DenseVector implements Tensor<float[]> {
+public class DenseVector extends Tensor<float[]> {
     private float[] data;
 
     public DenseVector() {
@@ -30,13 +31,10 @@ public class DenseVector implements Tensor<float[]> {
     }
 
     @Override
-    public boolean equalsInTolerance(Tensor vec, float eps) {
-        boolean isDense = vec instanceof DenseVector;
-        if (!isDense) {
-            return false;
-        }
-        return elementWise((DenseVector) vec, (a, b) -> Math.abs(a - b), false)
-                .sum() <= eps;
+    public Tensor valuesLike(float x) {
+        float[] newData = new float[data.length];
+        Arrays.fill(newData, x);
+        return new DenseVector(newData);
     }
 
     @Override
@@ -54,14 +52,6 @@ public class DenseVector implements Tensor<float[]> {
         this.data = floats;
     }
 
-    public DenseVector minus(DenseVector vec, boolean inPlace) {
-        return elementWise(vec, (a, b) -> a - b, inPlace);
-    }
-
-    public DenseVector add(DenseVector vec, boolean inPlace) {
-        return elementWise(vec, (a, b) -> a + b, inPlace);
-    }
-
     public float reduce(float initValue, final BinaryOperator<Float> function) {
         float res = initValue;
         for (float x : data) {
@@ -70,20 +60,16 @@ public class DenseVector implements Tensor<float[]> {
         return res;
     }
 
+    @Override
     public float sum() {
         return reduce(0, (a, b) -> a + b);
     }
 
-    public DenseVector multiply(float x, boolean inPlace) {
-        return elementWise(a -> a * x, inPlace);
-    }
 
-
-    public DenseVector multiply(DenseVector vec, boolean inPlace) {
-        return elementWise(vec, (a, b) -> a * b, inPlace);
-    }
-
-    public DenseVector elementWise(DenseVector b, BiFunction<Float, Float, Float> function, boolean inPlace) {
+    @Override
+    public DenseVector elementWise(Tensor a, BiFunction<Float, Float, Float> function, boolean inPlace) {
+        assert a instanceof DenseVector;
+        DenseVector b = (DenseVector)a;
         assert data.length == b.data.length;
         float[] c;
         if (inPlace) {
@@ -101,6 +87,8 @@ public class DenseVector implements Tensor<float[]> {
         }
     }
 
+
+    @Override
     public DenseVector elementWise(Function<Float, Float> function, boolean inPlace) {
         float[] c;
         if (inPlace) {
@@ -146,4 +134,49 @@ public class DenseVector implements Tensor<float[]> {
         }
         return new DenseMatrix(c);
     }
+
+    /*
+    public DenseVector abs(boolean inPlace){
+        return elementWise(Math::abs, inPlace);
+    }
+    */
+    /*
+    public DenseVector elementWise(Function<Float, Float> function, boolean inPlace) {
+        float[] c;
+        if (inPlace) {
+            c = this.data;
+        } else {
+            c = new float[data.length];
+        }
+        for (int i = 0; i < data.length; i++) {
+            c[i] = function.apply(data[i]);
+        }
+        if (inPlace) {
+            return this;
+        } else {
+            return new DenseVector(c);
+        }
+    }
+    */
+    /*
+    public DenseVector minus(DenseVector vec, boolean inPlace) {
+        return elementWise(vec, (a, b) -> a - b, inPlace);
+    }
+
+    public DenseVector add(DenseVector vec, boolean inPlace) {
+        return elementWise(vec, (a, b) -> a + b, inPlace);
+    }
+    */
+
+    /*
+    public DenseVector multiply(float x, boolean inPlace) {
+        return elementWise(a -> a * x, inPlace);
+    }
+    */
+
+    /*
+    public DenseVector multiply(DenseVector vec, boolean inPlace) {
+        return (DenseVector) elementWise(vec, (a, b) -> a * b, inPlace);
+    }
+    */
 }

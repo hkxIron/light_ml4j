@@ -1,4 +1,4 @@
-package com.ml4j.network;
+package com.ml4j.logisticregression;
 
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.SparseVector;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +81,7 @@ public class SparseLogisticRegression {
                 // compute diff = dL/dx, (pi-yi)*xi
                 float diff = prob - ys.data()[i];
                 float gradBias = diff;
-                SparseVector gradWeight = xs.get(i).multiply(diff, false);
+                SparseVector gradWeight = (SparseVector) xs.get(i).multiply(diff, false);
 
                 /*  loss = |w|
                     d|w|= 1 if w>0
@@ -92,9 +91,9 @@ public class SparseLogisticRegression {
                 if (l1Penalty > 0) { // 只计算sparse处的L1梯度
                     loss += l1Penalty * (weights.abs(false).sum() + Math.abs(bias));
 
-                    SparseVector gradL1 = weights.sign(false).multiply(l1Penalty, true);
+                    SparseVector gradL1 = (SparseVector) weights.sign(false).multiply(l1Penalty, true);
 
-                    gradWeight = gradWeight.add(gradL1);
+                    gradWeight.add(gradL1, true);
                     gradBias += l1Penalty * Math.signum(bias);
                 }
                 // loss = w^2
@@ -102,14 +101,14 @@ public class SparseLogisticRegression {
                 if (l2Penalty > 0) { // 只计算sparse处的L2梯度
                     loss += l2Penalty * (weights.pow(2f, false).sum() + bias * bias);
 
-                    SparseVector gradL2 = weights.multiply(2 * l2Penalty, false);
-                    gradWeight = gradWeight.add(gradL2);
+                    SparseVector gradL2 = (SparseVector) weights.multiply(2 * l2Penalty, false);
+                    gradWeight.add(gradL2, true);
                     gradBias += l2Penalty * bias;
                 }
 
                 // backward
                 // w += -lr* grad;
-                weights = weights.add(gradWeight.multiply(-learningRate, false));
+                weights = (SparseVector) weights.add(gradWeight.multiply(-learningRate, false), false);
                 bias += -learningRate * gradBias;
 
                 iter++;

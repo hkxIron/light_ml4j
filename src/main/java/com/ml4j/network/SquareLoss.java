@@ -48,7 +48,7 @@ public class SquareLoss extends Loss {
     @Override
     public DenseVector computeGrad() {
         assert pred != null;
-        return this.pred.minus(this.getLabel(), false)
+        return (DenseVector) this.pred.minus(this.getLabel(), false)
                 .multiply(0.5f, true);
     }
 }

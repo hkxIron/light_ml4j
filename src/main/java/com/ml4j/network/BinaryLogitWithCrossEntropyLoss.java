@@ -61,6 +61,6 @@ public class BinaryLogitWithCrossEntropyLoss extends Loss {
     @Override
     public DenseVector computeGrad() {
         assert pred != null;
-        return this.pred.minus(this.getLabel(), false);
+        return (DenseVector) this.pred.minus(this.getLabel(), false);
     }
 }

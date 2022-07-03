@@ -2,6 +2,7 @@ package com.ml4j.regularizer;
 
 import com.ml4j.data.DenseMatrix;
 import com.ml4j.data.DenseVector;
+import com.ml4j.data.Tensor;
 
 import static com.ml4j.initializer.VectorUtils.abs;
 import static com.ml4j.initializer.VectorUtils.sum;
@@ -20,33 +21,35 @@ public class L1Regularizer extends Regularizer {
 
     /**
      * loss = |w|
-     * dLoss/dw = 1 if w>0
+     * dLoss/dw =
+     * 1 if w>0
      * 0 if w=0
      * else -1;
      *
-     * @param matrix
+     * @param input
      * @return
      */
     @Override
-    public float computeLoss(DenseMatrix matrix) {
+    public float computeLoss(Tensor input) {
         float loss = 0;
         if (this.alpha <= 0) {
             return loss;
         }
-        int[] shapes = matrix.getShape();
-        for (int r = 0; r < shapes[0]; r++) {
-            loss += sum(abs(matrix.data()[r], false));
-        }
+        loss = input.abs(false).sum();
         return loss * alpha;
     }
 
     @Override
-    public float computeLoss(DenseVector vector) {
-        float loss;
-        loss = sum(abs(vector.data(), false));
-        return loss * alpha;
+    public Tensor computeGrad(Tensor input) {
+        if (this.alpha <= 0) {
+            return input.valuesLike(0);
+        }
+        Tensor grad = input.sign(false)
+                .multiply(alpha,true);
+        return grad;
     }
 
+    /*
     @Override
     public DenseMatrix computeGrad(DenseMatrix matrix) {
         if (this.alpha <= 0) {
@@ -65,4 +68,5 @@ public class L1Regularizer extends Regularizer {
         return new DenseVector(abs(vector.data(), false))
                 .multiply(alpha, true);
     }
+    */
 }

@@ -2,7 +2,7 @@ package com.ml4j.data.network;
 
 import com.google.common.collect.Lists;
 import com.ml4j.data.DenseVector;
-import com.ml4j.data.Initializer;
+import com.ml4j.initializer.Initializer;
 import com.ml4j.initializer.TruncatedNormalInitializer;
 import com.ml4j.data.utils.GsonUtil;
 import com.ml4j.math.ActivateFunction;
@@ -125,7 +125,7 @@ public class TestNetwork {
             for (int i = 0; i < sampleNum; i++) {
                 epochLoss += net.train(x[i], y[i]);
 
-                pred[i] = argMax(net.predict(x[i]));
+                pred[i] = argMax(net.predict(x[i]).data());
                 label[i] = argMax(y[i].data());
                 iter++;
             }
@@ -181,7 +181,7 @@ public class TestNetwork {
                 epochLoss += net.train(x[i], binaryY[i]);
                 //pred[i] = net.predict(x[i])[0];
                 int label = (int) binaryY[i].data()[0];
-                float pred = net.predict(x[i])[0];
+                float pred = net.predict(x[i]).data()[0];
                 predScore[i] = pred;
                 auc.add(label, pred);
                 iter++;
@@ -223,7 +223,7 @@ public class TestNetwork {
             for (int i = 0; i < sampleNum; i++) {
                 epochLoss += net.train(x[i], y[i]);
 
-                pred[i] = argMax(net.predict(x[i]));
+                pred[i] = argMax(net.predict(x[i]).data());
                 label[i] = argMax(y[i].data());
                 iter++;
             }

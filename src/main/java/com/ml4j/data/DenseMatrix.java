@@ -2,6 +2,7 @@ package com.ml4j.data;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -16,7 +17,7 @@ import static com.ml4j.initializer.VectorUtils.allEquals;
  * Time: 下午5:42
  */
 @Slf4j
-public class DenseMatrix implements Tensor<float[][]> {
+public class DenseMatrix extends Tensor<float[][]> {
     // int[][] arr = {{1,2,3},{3,4,2}};
     private float[][] data;
 
@@ -56,13 +57,16 @@ public class DenseMatrix implements Tensor<float[][]> {
     }
 
     @Override
-    public boolean equalsInTolerance(Tensor vec, float eps) {
-        boolean isMatrix = vec instanceof DenseMatrix;
-        if (!isMatrix) {
-            return false;
+    public Tensor valuesLike(float x) {
+        int[] shape = getShape();
+        int M = shape[0];
+        int N = shape[1];
+
+        float[][] newData = new float[M][N];
+        for (int m = 0; m < M; m++) {
+            Arrays.fill(newData[m], x);
         }
-        DenseMatrix mat = (DenseMatrix) vec;
-        return this.elementWise(mat, (a, b) -> Math.abs(a - b), false).sum() < eps;
+        return new DenseMatrix(newData);
     }
 
     @Override
@@ -141,6 +145,7 @@ public class DenseMatrix implements Tensor<float[][]> {
         return elementWise(Math::abs, inPlace);
     }
 
+    @Override
     public DenseMatrix elementWise(Function<Float, Float> func, boolean inPlace) {
         int[] shape = getShape();
         int M = shape[0];
@@ -205,7 +210,8 @@ public class DenseMatrix implements Tensor<float[][]> {
         return new DenseVector(vals);
     }
 
-    public DenseMatrix elementWise(DenseMatrix mat, BiFunction<Float, Float, Float> func, boolean inPlace) {
+    @Override
+    public DenseMatrix elementWise(Tensor mat, BiFunction<Float, Float, Float> func, boolean inPlace) {
         int[] shape = getShape();
         int M = shape[0];
         int N = shape[1];
@@ -219,7 +225,7 @@ public class DenseMatrix implements Tensor<float[][]> {
         }
         for (int m = 0; m < M; m++) {
             for (int n = 0; n < N; n++) {
-                newData[m][n] = func.apply(data[m][n], mat.data[m][n]);
+                newData[m][n] = func.apply(data[m][n], ((DenseMatrix)mat).data[m][n]);
             }
         }
         if (inPlace) {
