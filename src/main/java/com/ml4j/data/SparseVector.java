@@ -12,7 +12,7 @@ import java.util.function.Function;
  * @author: kexin
  * @date: 2022/6/29 10:47
  **/
-public class SparseVector extends Tensor<Map<Integer, Float>> {
+public class SparseVector extends Tensor<Map<Integer, Float>> implements IVector {
     @Getter
     private final Map<Integer, Float> indToVal; //  0,  7,  9
     private int maxSize;
@@ -170,6 +170,18 @@ public class SparseVector extends Tensor<Map<Integer, Float>> {
         } else {
             return new SparseVector(this.maxSize, weight);
         }
+    }
+
+    @Override
+    public Tensor concat(Tensor a) {
+        SparseVector sp = (SparseVector)a;
+        int allSize = this.maxSize + sp.maxSize;
+        Map<Integer, Float> indToVal = new HashMap<>();
+        indToVal.putAll(this.indToVal);
+        sp.indToVal.forEach((ind, val)->{
+            indToVal.put(ind+this.maxSize, val);
+        });
+        return new SparseVector(allSize, indToVal);
     }
 
     /*

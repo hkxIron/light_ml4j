@@ -11,17 +11,28 @@ import java.util.function.Function;
  * @author: kexin
  * @date: 2022/6/23 21:44
  **/
-public class DenseVector extends Tensor<float[]> {
+public class DenseVector extends Tensor<float[]> implements IVector {
     private float[] data;
 
     public DenseVector() {
     }
+
     public DenseVector(int size) {
         this.data = new float[size];
     }
 
     public DenseVector(float[] data) {
         this.data = data;
+    }
+
+    @Override
+    public DenseVector concat(Tensor vec0) {
+        assert vec0 instanceof DenseVector;
+        DenseVector vec = (DenseVector)vec0;
+        float[] newData = new float[data.length + vec.data.length];
+        System.arraycopy(data, 0, newData, 0, data.length);
+        System.arraycopy(vec.data, 0, newData, data.length, vec.data.length);
+        return new DenseVector(newData);
     }
 
     public DenseVector copy() {
@@ -69,7 +80,7 @@ public class DenseVector extends Tensor<float[]> {
     @Override
     public DenseVector elementWise(Tensor a, BiFunction<Float, Float, Float> function, boolean inPlace) {
         assert a instanceof DenseVector;
-        DenseVector b = (DenseVector)a;
+        DenseVector b = (DenseVector) a;
         assert data.length == b.data.length;
         float[] c;
         if (inPlace) {
