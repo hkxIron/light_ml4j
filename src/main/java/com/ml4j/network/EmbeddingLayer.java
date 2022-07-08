@@ -31,9 +31,9 @@ public class EmbeddingLayer extends Layer {
     private DenseVector dLdW;
     private Regularizer regularizer;
 
-    public EmbeddingLayer(int inSize, int outSize, Combiner combiner, Regularizer regularizer) {
-        this.inSize = inSize;
-        this.outSize = outSize;
+    public EmbeddingLayer(int vocabSize, int embeddingSize, Combiner combiner, Regularizer regularizer) {
+        this.inSize = vocabSize;
+        this.outSize = embeddingSize;
         this.combiner = combiner;
         this.regularizer = regularizer;
     }

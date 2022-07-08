@@ -3,6 +3,7 @@ package com.ml4j.network;
 import com.ml4j.data.DenseVector;
 import com.ml4j.initializer.Initializer;
 import com.ml4j.optimizer.Optimizer;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  * @date: 2022/6/25 13:39
  **/
 @Slf4j
+@Getter
 public class Network {
     private Optimizer optimizer;
     private List<Layer> layers;
@@ -62,7 +64,7 @@ public class Network {
         return loss;
     }
 
-    public void backward() {
+    public DenseVector backward() {
         int num = layers.size();
         assert num > 0;
         DenseVector delta = lossLayer.computeGrad();
@@ -70,6 +72,7 @@ public class Network {
             Layer layer = layers.get(i);
             delta = layer.backward(delta);
         }
+        return delta;
     }
 
     public void update() {

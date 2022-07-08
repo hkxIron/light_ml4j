@@ -2,7 +2,9 @@ package com.ml4j.data;
 
 import com.ml4j.initializer.VectorUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -28,11 +30,33 @@ public class DenseVector extends Tensor<float[]> implements IVector {
     @Override
     public DenseVector concat(Tensor vec0) {
         assert vec0 instanceof DenseVector;
-        DenseVector vec = (DenseVector)vec0;
+        DenseVector vec = (DenseVector) vec0;
         float[] newData = new float[data.length + vec.data.length];
         System.arraycopy(data, 0, newData, 0, data.length);
         System.arraycopy(vec.data, 0, newData, data.length, vec.data.length);
         return new DenseVector(newData);
+    }
+
+    public List<DenseVector> split(List<Integer> splitSizes) {
+        int len = data.length;
+        int totalSize = splitSizes.stream().reduce(Integer::sum).get();
+        assert len >= totalSize;
+
+        List<Integer> splitSizeNew = new ArrayList<>(splitSizes);
+        if (totalSize < len) {
+            splitSizeNew.add(len - totalSize);
+        }
+
+        List<DenseVector> vecs = new ArrayList<>();
+        int startIndex = 0;
+        for (Integer size : splitSizeNew) {
+            float[] newData = new float[size];
+            System.arraycopy(data, startIndex, newData, 0, size);
+            startIndex += size;
+            vecs.add(new DenseVector(newData));
+        }
+
+        return vecs;
     }
 
     public DenseVector copy() {

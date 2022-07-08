@@ -5,9 +5,11 @@ import com.ml4j.data.DenseVector;
 import com.ml4j.data.Tensor;
 import com.ml4j.initializer.Initializer;
 import com.ml4j.optimizer.Optimizer;
-import com.ml4j.regularizer.Regularizer;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author: kexin
@@ -22,13 +24,12 @@ public class ConcatLayer extends Layer {
 
     @Getter
     private int outSize;
-    private DenseVector dLdW;
 
     public ConcatLayer(Layer left, Layer right) {
         this.left = left;
         this.right = right;
 
-        this.inSize = left.getOutSize()+ right.getOutSize();
+        this.inSize = left.getOutSize() + right.getOutSize();
         this.outSize = left.getOutSize() + right.getOutSize();
     }
 
@@ -41,63 +42,18 @@ public class ConcatLayer extends Layer {
 
     @Override
     public DenseVector backward(DenseVector delta) {
-        dLdW = delta.copy();
+        List<Integer> sizes = new ArrayList<>();
+        sizes.add(left.getOutSize());
+        sizes.add(right.getOutSize());
 
-        int size = input.getShape()[0];
-        if (combiner == Combiner.AVG) {
-            dLdW.multiply(1f / size, true);
-        }
+        List<DenseVector> dLossDx = delta.split(sizes);
+        assert dLossDx.size() == 2;
+        left.backward(dLossDx.get(0));
+        left.backward(dLossDx.get(1));
 
-        if (this.regularizer != null) {
-            DenseVector regGrad = new DenseVector(outSize);
-            float[] ids = this.input.data();
-            for (int i = 0; i < ids.length; i++) {
-                int idx = (int) ids[i];
-                DenseVector row = new DenseVector(weight.data()[idx]);
-                regGrad.add(regularizer.computeGrad(row), true);
-            }
-            if(combiner == Combiner.AVG){
-                regGrad.multiply(1f / size, true);
-            }
-            dLdW.add(regGrad, true);
-        }
-        return dLdW;
+        return null;
     }
 
-    @Override
-    public void update(Optimizer optimizer) {
-        // update
-        // w = w + (-1)*lr* dL/dW
-        float learningRate = optimizer.computeLearningRate();
-        DenseVector diff = (DenseVector) dLdW.multiply(-learningRate, false);
-
-        float[] ids = this.input.data();
-        for (int i = 0; i < ids.length; i++) {
-            int idx = (int) ids[i];
-            DenseVector row = new DenseVector(weight.data()[idx]);
-            row.add(diff, true);
-        }
-    }
-
-    @Override
-    public void initWeights(Initializer initializer) {
-        this.weight = new DenseMatrix(this.inSize, outSize);
-        initializer.init(weight);
-    }
-
-    @Override
-    public void setInput(Tensor x) {
-        assert x instanceof DenseVector;
-        assert x.elementWise(e -> {
-            int i = (int) e;
-            if (i >= 0 && i < inSize) { // check index range
-                return 0; // 合法
-            } else {
-                return 1;
-            }
-        }, false).sum() == 0;
-        this.input = (DenseVector) x;
-    }
 
     @Override
     public int getOutSize() {
@@ -120,19 +76,19 @@ public class ConcatLayer extends Layer {
     }
 
     @Override
-    public float getRegularizationLoss() {
-        float loss = 0;
-        if (this.regularizer != null) {
-            float[] ids = this.input.data();
-            for (int i = 0; i < ids.length; i++) {
-                int idx = (int) ids[i];
-                DenseVector row = new DenseVector(weight.data()[idx]);
-                loss += regularizer.computeLoss(row);
-            }
-            if(combiner == Combiner.AVG){
-                loss/=ids.length;
-            }
-        }
-        return loss;
+    public void update(Optimizer optimizer){
+        this.left.update(optimizer);
+        this.right.update(optimizer);
+    }
+
+    @Override
+    public void initWeights(Initializer initializer) {
+        this.left.initWeights(initializer);
+        this.right.initWeights(initializer);
+    }
+
+    @Override
+    public float getRegularizationLoss(){
+        return left.getRegularizationLoss()+right.getRegularizationLoss();
     }
 }

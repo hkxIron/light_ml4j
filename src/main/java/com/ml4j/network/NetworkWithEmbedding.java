@@ -1,8 +1,10 @@
 package com.ml4j.network;
 
 import com.ml4j.data.DenseVector;
+import com.ml4j.data.SparseVector;
 import com.ml4j.initializer.Initializer;
 import com.ml4j.optimizer.Optimizer;
+import jdk.nashorn.internal.objects.annotations.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -12,94 +14,61 @@ import java.util.List;
  * @date: 2022/6/25 13:39
  **/
 @Slf4j
-public class NetworkWithEmbedding {
-    private Optimizer optimizer;
+public class NetworkWithEmbedding extends Network {
+    private EmbeddingLayer firstEmbedLayer;
+    private DenseLayer firstDenseLayer;
+    private ConcatLayer concatLayer;
 
-    private List<Layer> denseLayers;
-    private Loss lossLayer;
-    private Initializer initializer;
-
-    public Initializer getInitializer() {
-        return initializer;
-    }
-
-    public NetworkWithEmbedding(List<Layer> layers, Loss lossLayer, Initializer initializer,
+    public NetworkWithEmbedding(EmbeddingLayer firstEmbeddingLayer,
+                                DenseLayer firstDenseLayer,
+                                List<Layer> middleLayers,
+                                Loss lossLayer,
+                                Initializer initializer,
                                 Optimizer optimizer) {
-        this.denseLayers = layers;
-        this.lossLayer = lossLayer;
-        this.initializer = initializer;
-        this.optimizer = optimizer;
+        super(middleLayers, lossLayer, initializer, optimizer);
+        this.firstEmbedLayer = firstEmbeddingLayer;
+        this.firstDenseLayer = firstDenseLayer;
+        this.concatLayer = new ConcatLayer(this.firstEmbedLayer, this.firstDenseLayer);
     }
 
-    public void build(int featSize) {
-        int layerNum = denseLayers.size();
-        log.info("layerNum:{} featSize:{}", layerNum, featSize);
-        assert layerNum > 0;
-        denseLayers.get(0).setInSize(featSize);
-        denseLayers.get(0).initWeights(initializer);
-
-        for (int i = 1; i < layerNum; i++) {
-            int outSizeLastLayer = denseLayers.get(i - 1).getOutSize();
-            denseLayers.get(i).setInSize(outSizeLastLayer);
-            denseLayers.get(i).initWeights(initializer);
-        }
+    public void build() {
+        int outSize = firstEmbedLayer.getOutSize()+ firstDenseLayer.getOutSize();
+        concatLayer.initWeights(this.getInitializer());
+        super.build(outSize);
     }
 
-    public float forward(DenseVector x, DenseVector y) {
-        int num = denseLayers.size();
-        assert num > 0;
-        DenseVector in = x;
-        float loss = 0;
-        for (int i = 0; i < num; i++) {
-            Layer layer = denseLayers.get(i);
-            layer.setInput(in);
-            in = layer.forward();
-            loss += layer.getRegularizationLoss();
-        }
-        lossLayer.setInput(in);
-        lossLayer.setLabel(y);
-        loss += lossLayer.computeLoss();
-
+    public float forward(DenseVector sparseFeats, DenseVector denseFeats, DenseVector y) {
+        this.firstEmbedLayer.setInput(sparseFeats);
+        this.firstDenseLayer.setInput(denseFeats);
+        DenseVector out = concatLayer.forward();
+        float loss = super.forward(out, y);
         return loss;
     }
 
-    public void backward() {
-        int num = denseLayers.size();
-        assert num > 0;
-        DenseVector delta = lossLayer.computeGrad();
-        for (int i = num - 1; i >= 0; i--) {
-            Layer layer = denseLayers.get(i);
-            delta = layer.backward(delta);
-        }
+    @Override
+    public DenseVector backward() {
+        DenseVector delta = super.backward();
+        return this.concatLayer.backward(delta);
     }
 
+    @Override
     public void update() {
-        int num = denseLayers.size();
-        assert num > 0;
-        for (int i = num - 1; i >= 0; i--) {
-            Layer layer = denseLayers.get(i);
-            layer.update(optimizer);
-        }
+       super.update();
+       concatLayer.update(this.getOptimizer());
     }
 
-    public float train(DenseVector x, DenseVector y) {
-        float loss = forward(x, y);
-        backward();
-        update();
+    public float train(DenseVector sparseFeats, DenseVector denseVector, DenseVector y) {
+        float loss = this.forward(sparseFeats, denseVector, y);
+        this.backward();
+        this.update();
         return loss;
     }
 
-    public DenseVector predict(DenseVector x) {
-        int num = denseLayers.size();
-        assert num > 0;
-        DenseVector in = x;
-        for (int i = 0; i < num; i++) {
-            Layer layer = denseLayers.get(i);
-            layer.setInput(in);
-            in = layer.forward();
-        }
-        lossLayer.setInput(in);
-        DenseVector score = lossLayer.predict();
-        return score;
+    public DenseVector predict(DenseVector sparseFeats, DenseVector denseFeats) {
+        this.firstEmbedLayer.setInput(sparseFeats);
+        this.firstDenseLayer.setInput(denseFeats);
+        DenseVector out = concatLayer.forward();
+        return super.predict(out);
     }
 }
+

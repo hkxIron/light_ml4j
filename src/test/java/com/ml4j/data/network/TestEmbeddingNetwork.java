@@ -48,7 +48,10 @@ public class TestEmbeddingNetwork {
         Loss loss = new BinaryLogitWithCrossEntropyLoss();
         Initializer initializer = new TruncatedNormalInitializer();
         Optimizer optimizer = new FixedOptimizer(5e-3f);
-        Network net = new Network(layers, loss, initializer, optimizer);
+
+        /*
+        EmbeddingLayer embeddingLayer = new EmbeddingLayer();
+        Network net = new NetworkWithEmbedding(layers, loss, initializer, optimizer);
         net.build(inputFeatureDim);
 
         int sampleNum = 120;
@@ -90,6 +93,7 @@ public class TestEmbeddingNetwork {
         }
         log.info("pred :{}", GsonUtil.normalGson.toJson(predScore));
         log.info("label:{}", GsonUtil.normalGson.toJson(originLabel));
+    */
     }
 }
 
