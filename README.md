@@ -24,8 +24,8 @@ For simple recommendation models, the features are generally sparse, so it does 
 ## Features
 - support MLP
 - support sparse LR 
-- loss: softmax,logistic,square loss
+- support sparse feature, embeddings
+- loss: softmax, logistic, square loss
 
-##TODO:
-- support spare feature, embeddings
+## TODO
 - support rnn, lstm
