@@ -15,6 +15,14 @@ public class VectorUtils {
         return arr;
     }
 
+    public static float[] toFloatArr(List<Integer> vals) {
+        float[] arr = new float[vals.size()];
+        for (int i = 0; i < vals.size(); i++) {
+            arr[i] = vals.get(i)+0.0f;
+        }
+        return arr;
+    }
+
     public static float[] toFloatArray(List<Float> vals) {
         float[] arr = new float[vals.size()];
         for (int i = 0; i < vals.size(); i++) {

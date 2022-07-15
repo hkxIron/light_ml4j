@@ -1,8 +1,10 @@
 package com.ml4j.data.data;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.ml4j.data.DenseVector;
 import com.ml4j.data.SparseVector;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,8 +12,8 @@ import java.util.stream.Collectors;
 import static com.ml4j.data.utils.FileUtils.readFileByAbsolutePath;
 import static com.ml4j.data.utils.FileUtils.readFile;
 import static com.ml4j.data.utils.GsonUtil.normalGson;
+import static com.ml4j.initializer.VectorUtils.toFloatArr;
 import static com.ml4j.initializer.VectorUtils.toFloatArray;
-import static com.ml4j.initializer.VectorUtils.toIntArray;
 
 /**
  * @author: kexin
@@ -147,6 +149,144 @@ public class DataLoader {
 
         dataSet.setTrainX(trainX);
         dataSet.setTrainY(new DenseVector(toFloatArray(trainY)));
+
+        System.out.println("positive num:"+ positiveNum + " all num:"+ (testY.size()+ trainY.size()));
+        return dataSet;
+    }
+
+    public static SparseDenseDataSet loadSparseDenseCensus(int totalSampleNum, float testRatio){
+        String trainContents = "";
+        try {
+            trainContents = readFile(readFileByAbsolutePath("census/adult_train_test.data"));
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        String[] lines = trainContents.split("\n");
+        Set<String> allCategoryValues = new HashSet<>();
+        List<String> continuesFeatureNames = Lists.newArrayList("age", "education-num", "capital-gain", "capital-loss", "hours-per-week", "fnlwgt");
+
+        List<String> cols = new ArrayList<>();
+        Map<String, Float> continousColumnToMax = new HashMap();
+        int num =0;
+        // 先加载分析数据
+        for (int i = 0; i < lines.length; i++) {
+            if (i == 0) { // 列名
+                cols = Arrays.stream(lines[i].split(",")).map(String::trim)
+                        .collect(Collectors.toList());
+                System.out.println("col size:" + cols.size() + " cols:" + normalGson.toJson(cols));
+                continue;
+            }
+
+            String[] arr = lines[i].split(",");
+            if (arr.length != 15) {
+                continue;
+            }
+
+            for (int c = 0; c < cols.size() - 1; c++) {
+                if (c == 2) {
+                    continue;// skip fnlwgt
+                }
+                String v = arr[c].trim();
+                String col = cols.get(c);
+                if (continuesFeatureNames.contains(col)) {
+                    //allCategoryValues.add(col);
+                    continousColumnToMax.put(col,
+                            Math.max(continousColumnToMax.getOrDefault(col, 0f),
+                                    Float.parseFloat(v)));
+                } else {
+                    allCategoryValues.add(col + "_" + v);
+                }
+            }
+        }
+
+        List<String> sortedfeatValues = allCategoryValues.stream().sorted().collect(Collectors.toList());
+        HashMap<String, Integer> strToIndex = new HashMap(sortedfeatValues.size());
+        HashMap<Integer, String> indexToStr = new HashMap(sortedfeatValues.size());
+        for (int i = 0; i < sortedfeatValues.size(); i++) {
+            strToIndex.put(sortedfeatValues.get(i), i);
+            indexToStr.put(i, sortedfeatValues.get(i));
+        }
+
+        System.out.println("feature values:" + normalGson.toJson(sortedfeatValues));
+
+        List<Pair<DenseVector, DenseVector>> trainSparseDenseX = new ArrayList<>();
+        List<DenseVector> trainY = new ArrayList<>();
+
+        List<Pair<DenseVector, DenseVector>> testSparseDenseX = new ArrayList<>();
+        List<DenseVector> testY = new ArrayList<>();
+
+        String positiveLabel = ">50K";
+        int positiveNum = 0;
+        // 加载数据
+        Random rand = new Random();
+        for (int i = 0; i < lines.length; i++) {
+            if (i == 0) {
+                continue;
+            }
+
+            String[] arr = lines[i].split(",");
+            if (arr.length != 15) {
+                continue;
+            }
+
+            //Map<Integer, Float> indexToValue = new HashMap<>();
+            List<Integer> indexs = new ArrayList<>();
+            float[] continuosValues = new float[continuesFeatureNames.size()-1];
+            for (int c = 0; c < cols.size() - 1; c++) {
+                if (c == 2) {
+                    continue;// skip fnlwgt
+                }
+                String columnName = cols.get(c);
+                String value = arr[c].trim();
+                int index;
+                float val;
+                if (continuesFeatureNames.contains(columnName)) {
+                    val = Float.parseFloat(value) / continousColumnToMax.get(columnName);
+                    index = continuesFeatureNames.indexOf(columnName);
+                    continuosValues[index] = val;
+                } else {
+                    //val = 1f;
+                    index = strToIndex.get(columnName + "_" + value);
+                }
+                //indexToValue.put(index, val);
+                indexs.add(index);
+            }
+
+            float label = 0;
+            if (arr[14].trim().equals(positiveLabel)) {
+                label = 1;
+                positiveNum++;
+            } else {
+                label = 0;
+            }
+
+            DenseVector sparseIds = new DenseVector(toFloatArr(indexs));
+            DenseVector denseFeat = new DenseVector(continuosValues);
+
+            if (rand.nextDouble() < testRatio) {
+                //testSparseDenseX.add(xSparse);
+                testSparseDenseX.add(Pair.of(sparseIds, denseFeat));
+                testY.add(new DenseVector(new float[]{label}));
+            } else {
+                trainSparseDenseX.add(Pair.of(sparseIds, denseFeat));
+                trainY.add(new DenseVector(new float[]{label}));
+            }
+
+            num++;
+            if(num>=totalSampleNum){
+                break;
+            }
+        }
+        SparseDenseDataSet dataSet = new SparseDenseDataSet();
+        dataSet.setFeatureNames(sortedfeatValues);
+
+        dataSet.setTestX(testSparseDenseX);
+        dataSet.setTestY(testY);
+
+        dataSet.setTrainX(trainSparseDenseX);
+        dataSet.setTrainY(trainY);
+
+        dataSet.setSparseFeatNum(allCategoryValues.size());
 
         System.out.println("positive num:"+ positiveNum + " all num:"+ (testY.size()+ trainY.size()));
         return dataSet;

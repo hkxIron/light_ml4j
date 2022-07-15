@@ -49,7 +49,7 @@ public class ConcatLayer extends Layer {
         List<DenseVector> dLossDx = delta.split(sizes);
         assert dLossDx.size() == 2;
         left.backward(dLossDx.get(0));
-        left.backward(dLossDx.get(1));
+        right.backward(dLossDx.get(1));
 
         return null;
     }

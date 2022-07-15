@@ -33,7 +33,10 @@ public class NetworkWithEmbedding extends Network {
 
     public void build() {
         int outSize = firstEmbedLayer.getOutSize()+ firstDenseLayer.getOutSize();
+        firstEmbedLayer.initWeights(this.getInitializer());
+        firstDenseLayer.initWeights(this.getInitializer());
         concatLayer.initWeights(this.getInitializer());
+
         super.build(outSize);
     }
 

@@ -114,11 +114,11 @@ public class EmbeddingLayer extends Layer {
     public void setInput(Tensor x) {
         assert x instanceof DenseVector;
         assert x.elementWise(e -> {
-            int i = (int) e;
+            int i = (int) ((float)e);
             if (i >= 0 && i < inSize) { // check index range
-                return 0; // 合法
+                return 0f; // 合法
             } else {
-                return 1;
+                return 1f;
             }
         }, false).sum() == 0;
         this.input = (DenseVector) x;
