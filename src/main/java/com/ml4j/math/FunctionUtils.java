@@ -79,4 +79,20 @@ public class FunctionUtils {
         }
         return arr;
     }
+
+    /***
+     * tanh(x) = (e^x-e^(-x))/(e^x+e^(-x))
+     *  = 2*sigmoid(2*x)-1
+     *
+     * tanh'(x) = 1 - (tanh(x))^2
+     *
+     */
+    public static float tanh(float x) {
+        return 2 * sigmoid(2 * x) - 1;
+    }
+
+    public static float dTanh(float x) {
+        float t = tanh(x);
+        return 1 - t * t;
+    }
 }
