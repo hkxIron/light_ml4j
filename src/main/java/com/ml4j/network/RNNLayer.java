@@ -13,7 +13,10 @@ import java.util.List;
 /**
  * @author: kexin
  * @date: 2022/6/23 23:10
- * <p>
+ *
+ * ref: https://github.com/hkxIron/hkx_tf_practice/blob/master/test_numpy/nn_scratch/rnn/min_char_rnn.py
+ *
+ *
  * h(t) = tanh(Whx * x(t) + Whh*h(t-1) + bh)
  * y = Why * h(t) + by
  * p = softmax(y)
@@ -101,16 +104,16 @@ public class RNNLayer extends Layer {
     @Override
     public DenseVector forward() {
         int seqLen = input.size();
-        DenseVector ht_prev = new DenseVector(new float[hiddenSize]);
+        DenseVector htPrev = new DenseVector(new float[hiddenSize]);
         DenseVector ht = null;
         for (int i = 0; i < seqLen; i++) {
             DenseVector xt = input.get(i);
-            DenseVector s = (DenseVector) Wh.multiply(ht_prev)
+            DenseVector s = (DenseVector) Wh.multiply(htPrev)
                     .add(Wx.multiply(xt), true).
                             add(bias, true); // [outsize]
             ht = tanh.activate(s, true);
             hidden.add(ht);
-            ht_prev = ht;
+            htPrev = ht;
         }
         return ht;
     }
@@ -118,7 +121,7 @@ public class RNNLayer extends Layer {
     /**
      * BPTT: backpropagation through time
      *
-     *              Loss
+     *              L:loss
      *            /  |  \
      *           /   |   \
      *         L1    L2   L3 ...
@@ -133,12 +136,13 @@ public class RNNLayer extends Layer {
      *        因此求导数时,dh2中应有dh3,dh1中应有dh2
      *
      * forward:
-     * s = W_h*h_(t-1)+ W_x*x_t + bias
+     * s = Wh*h_(t-1)+ Wx*x_t + bias
      * h_t = tanh(s)
      * Loss = sum_t(f(h_t, label_t))
      *
      * backward:
      * dL/ds = dL/dht*dht/ds = delta* tanh'
+     * delta = f'
      *
      * dL/dwh = dL/ds*ds/dWh = dL/ds * h(t-1)
      * dL/dwx = dL/ds*ds/dWx = dL/ds * xt
@@ -154,6 +158,8 @@ public class RNNLayer extends Layer {
     @Override
     public DenseVector backward(DenseVector delta) {
         int seqLen = input.size();
+        DenseVector htNext = new DenseVector(new float[hiddenSize]);
+
         for (int i = seqLen-1; i >=0; i--) {
 
         }
