@@ -24,6 +24,7 @@ import java.util.List;
  **/
 public class RNNLayer extends Layer {
     private String name;
+    private int seqLength; // 序列的长度
     private int inSize;
     private int outSize;
     private int hiddenSize;
